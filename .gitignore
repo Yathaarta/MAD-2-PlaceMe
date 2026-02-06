@@ -1,0 +1,92 @@
+# ==============================================================================
+# GLOBAL / OS / EDITOR FILES (Apply to whole repo)
+# ==============================================================================
+
+# OS junk files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# IDE & Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+logs/
+tmp/
+
+
+# ==============================================================================
+# BACKEND (Python / Flask) - "backend/" folder
+# ==============================================================================
+
+# Virtual Environments (Anywhere in repo)
+venv/
+env/
+.venv/
+
+# Compiled Python files (Anywhere in repo)
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Flask Specifics
+backend/instance/       # Local database & config folder
+backend/.env            # API Keys & Secrets (CRITICAL)
+backend/.flaskenv
+backend/secrets.py
+
+# Testing & Cache
+.pytest_cache/
+.coverage
+htmlcov/
+
+
+# ==============================================================================
+# DATABASE (SQLite)
+# ==============================================================================
+# Ignore local database files so they don't get overwritten by others
+*.sqlite3
+*.db
+*.sqlite
+
+
+# ==============================================================================
+# FRONTEND (Vue.js / Node) - "frontend/" folder
+# ==============================================================================
+
+# Dependencies (Huge folder, never commit)
+node_modules/
+frontend/node_modules/
+
+# Build Outputs (Generated code)
+frontend/dist/
+dist/
+build/
+
+# Local Environment Configs (Vite secrets)
+frontend/.env
+frontend/.env.local
+frontend/.env.*.local
+
+# Node Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+
+# ==============================================================================
+# PERSONAL DOCUMENTATION (Your diagrams)
+# ==============================================================================
+
+# Excalidraw files (Your personal sketches)
+*.excalidraw
+*.excalidraw.json
+
+# Optional: Ignore other scratchpad files if you have them
+# scratchpad.txt
+# todo.md
