@@ -28,6 +28,7 @@ tmp/
 venv/
 env/
 .venv/
+.env
 
 # Compiled Python files (Anywhere in repo)
 __pycache__/
