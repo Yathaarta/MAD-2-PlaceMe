@@ -7,6 +7,8 @@
 Thumbs.db
 ehthumbs.db
 Desktop.ini
+.AppleDouble
+.LSOverride
 
 # IDE & Editors
 .vscode/
@@ -21,7 +23,7 @@ tmp/
 
 
 # ==============================================================================
-# BACKEND (Python / Flask) - "backend/" folder
+# BACKEND (Python / Flask / Celery) - "backend/" folder
 # ==============================================================================
 
 # Virtual Environments (Anywhere in repo)
@@ -41,6 +43,11 @@ backend/.env            # API Keys & Secrets (CRITICAL)
 backend/.flaskenv
 backend/secrets.py
 
+# Celery & Redis
+celerybeat-schedule
+celerybeat.pid
+dump.rdb
+
 # Testing & Cache
 .pytest_cache/
 .coverage
@@ -57,27 +64,43 @@ htmlcov/
 
 
 # ==============================================================================
-# FRONTEND (Vue.js / Node) - "frontend/" folder
+# FRONTEND (Vue.js / Vite / Node) - "frontend/" folder
 # ==============================================================================
 
-# Dependencies (Huge folder, never commit)
+# Dependencies
 node_modules/
 frontend/node_modules/
 
-# Build Outputs (Generated code)
+# Build Outputs
 frontend/dist/
 dist/
 build/
+dist-ssr/
 
-# Local Environment Configs (Vite secrets)
+# Local Environment Configs
 frontend/.env
 frontend/.env.local
 frontend/.env.*.local
+*.local
+
+# Vite/Lint Caches & Temp Files
+.eslintcache
+frontend/.vite/
+*.timestamp-*-*.mjs
+*.tsbuildinfo
 
 # Node Logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Frontend Testing Artifacts
+coverage/
+cypress/videos/
+cypress/screenshots/
+__screenshots__/
 
 
 # ==============================================================================
@@ -87,7 +110,3 @@ yarn-error.log*
 # Excalidraw files (Your personal sketches)
 *.excalidraw
 *.excalidraw.json
-
-# Optional: Ignore other scratchpad files if you have them
-# scratchpad.txt
-# todo.md

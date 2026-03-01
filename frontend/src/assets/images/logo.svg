@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 40" fill="none" height="40">
+  <!-- ICON SECTION (Left) -->
+  <!-- Left Node (Student - Blue) -->
+  <circle cx="8" cy="20" r="5" fill="#1d961d"/>
+  
+  <!-- Right Node (Company - Dark) -->
+  <circle cx="38" cy="20" r="5" fill="#9ab8e8"/>
+  
+  <!-- Connection Line -->
+  <path d="M8 20L38 20" stroke="#64748b" stroke-width="2" stroke-opacity="0.5"/>
+  
+  <!-- Orbit Ring (Accent) -->
+  <circle cx="38" cy="20" r="9" stroke="#1d54ca" stroke-width="1.5" stroke-opacity="0.8" fill="none"/>
+  
+  <!-- TEXT SECTION -->
+  <!-- 'Place' (Bold, Dark) -->
+  <text x="54" y="29" font-family="sans-serif" font-weight="800" font-size="24" fill="#f1f1f1" letter-spacing="-0.5">Place</text>
+  
+  <!-- 'Me' (Thin, Blue) -->
+  <text x="125" y="29" font-family="sans-serif" font-weight="300" font-size="24" fill="#2563eb">Me</text>
+</svg>

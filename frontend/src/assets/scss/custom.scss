@@ -1,0 +1,56 @@
+// 1. Import functions first
+@import "bootstrap/scss/functions";
+
+// 2. Override variables here (e.g., changing the primary color)
+// 1. Override the main theme color (Primary)
+// $primary: #3c8dde;
+
+// 2. Add a brand-new color to the theme map
+$custom-colors: (
+  "violet":#712cf9,
+  "lightgreen": #80df88,
+  "lightblue": #00cbfe,
+  "lightred": #ffa8a8,
+  "gray": rgb(164, 164, 158),
+  "darkgray": rgb(29, 29, 29)
+);
+
+
+// Set this to false before variables and bootstrap
+// $enable-rounded: false;
+
+
+$carousel-control-color: #141010;
+/*==============================================================================================================================*/
+
+@import "bootstrap/scss/variables";
+// Merge your new colors so they generate .text-brand-purple, .btn-brand-purple, etc.
+$theme-colors: map-merge($theme-colors, $custom-colors);
+
+// Add a new level 6 that is 4.5rem (3rem * 1.5)
+$custom-spacers: ( 6: $spacer * 4.5 );
+$spacers: map-merge($spacers, $custom-spacers);
+
+
+
+// Change when the 'lg' breakpoint starts (e.g., from 992px to 1024px)
+$grid-breakpoints: map-merge($grid-breakpoints, (
+  // lg: 1024px
+));
+
+// $navbar-padding-x: 10rem;
+// $navbar-padding-y: 13px;
+// $navbar-font-size: 25px;
+// $navbar-brand-margin-end: 2rem;
+
+
+$carousel-control-width: 7%;
+$carousel-control-icon-width: 2rem;
+$carousel-indicator-width: 45px;
+
+$tooltip-color: black;
+$tooltip-bg: rgb(151, 230, 129);
+
+/*==============================================================================================================================*/
+// 3. Import the rest of Bootstrap
+@import "bootstrap/scss/bootstrap";
