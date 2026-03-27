@@ -15,7 +15,7 @@ def seed_academic_data():
         if not deg:
             deg = Degree(name=d_name) # type: ignore
             db.session.add(deg)
-            print("Academic Data Seeded! 1 : Degrees added")
+            print(f'Academic Data Seeded! 1 : Degree added {deg.name}')
         degree_objs[d_name] = deg
     
     db.session.commit()
@@ -38,7 +38,7 @@ def seed_academic_data():
         if not stream:
             stream = Stream(name=s_name, code=s_code) # type: ignore
             db.session.add(stream)
-            print("Academic Data Seeded! 2 : Streams added")
+            print(f'Academic Data Seeded! 2 : Stream added {stream.name}')
         stream_objs[s_code] = stream
     
     db.session.commit()
@@ -62,7 +62,7 @@ def seed_academic_data():
             if not prog:
                 prog = Program(degree_id=deg.id, stream_id=stream.id) # type: ignore
                 db.session.add(prog)
-                print("Academic Data Seeded! 3 : Programs added")
+                print(f'Academic Data Seeded! 3 : Program added {prog.degree_id} - {prog.stream_id}')
     
     db.session.commit()
     print("Academic Data present.")
@@ -119,5 +119,3 @@ def init_database():
         seed_academic_data()
         # will do later after apis and frontend made for testing
         
-if __name__ == '__main__':
-    init_database()

@@ -42,11 +42,17 @@ db.init_app(app)
 user_datastore = SQLAlchemyUserDatastore(db, User, Role)
 security = Security(app, user_datastore)
 
-from models.init_db import init_database
-init_database()
-
 
 import controllers.routes
+
+
+@app.cli.command("init-db")
+def init_db_command():
+    # Will initialize database only when 'flask init-db' command is run"
+    from models.init_db import init_database
+    init_database()
+    print("Database successfully initialized!")
+
 
 if __name__=='__main__':
     app.run()
