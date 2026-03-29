@@ -1,13 +1,12 @@
 <template>
   <form @submit.prevent="handleLogin" class="col-lg-5 align-self-center mb-lg-5 rounded-4 p-lg-5 bg-dark">
     <div class="mb-3">
-      <label for="recipient-name" class="col-form-label">Email:</label>
-      <input v-model="form.email" type="email" class="form-control bg-darkgray" id="email" required>
+      <label class="col-form-label text-light">Email:</label>
+      <input v-model="form.email" type="email" class="form-control bg-darkgray" required>
     </div>
     <div class="mb-3">
-      <label for="message-text" class="col-form-label">Password:</label>
-      <input v-model="form.password" type="password" class="form-control bg-darkgray" id="password" required/>
-
+      <label class="col-form-label text-light">Password:</label>
+      <input v-model="form.password" type="password" class="form-control bg-darkgray" required/>
     </div>
     <div class="mt-5 d-flex gap-3 justify-content-end align-items-center mb-lg-5">
       <button type="button" class="btn btn-sm btn-danger" @click="$emit('requestReset')">Forgot Password</button>
@@ -37,35 +36,19 @@ const handleLogin = async () => {
     const res = await axios.post('/api/login', form);
     addToastNotifications(res.data.message, 'success');
 
-    authStore.login(res.data.role);
+    authStore.login(res.data.role, res.data.name, res.data.uniquifier);
 
-    // bootstrap modal backdrop remove from dom
     const backdrops = document.querySelectorAll('.modal-backdrop');
     backdrops.forEach(backdrop => backdrop.remove());
-
-    // Restore body scrolling and remove Bootstrap's lock classes
     document.body.classList.remove('modal-open');
     document.body.style.overflow = '';
     document.body.style.paddingRight = '';
-    // ---------------------------------------------
 
-
-    // Redirect based on role
-    if (res.data.role === 'admin') router.push('/admin-dashboard');
-    else if (res.data.role === 'company') router.push('/company-dashboard');
-    else router.push('/student-dashboard');
-
+    router.push(`/${res.data.role}-dashboard`);
   } catch (error) {
-    const msg = error.response?.data?.error || "Login failed.";
-    addToastNotifications(msg, "error");
+    addToastNotifications(error.response?.data?.error || "Login failed.", "error");
   } finally {
     isLoading.value = false;
   }
 };
-
 </script>
-
-
-<style scoped>
-
-</style>
