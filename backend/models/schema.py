@@ -1,6 +1,7 @@
 from marshmallow import Schema, fields, validate, ValidationError
 import re
 
+
 def validate_official_name(name):
    
     if not name:
@@ -30,6 +31,39 @@ def validate_official_name(name):
             if len(parts[i])<2:
                 raise ValidationError(f"Name '{parts[i]}' in '{' '.join(parts)}' is too short.")
     
+
+
+def safe_format_date(dt):
+    # Safely formats a datetime or date object into a readable string
+    if not dt: 
+        return "TBD"
+    if hasattr(dt, 'strftime'): 
+        return dt.strftime('%b %d, %Y')
+    return str(dt)[:10]
+
+
+
+def get_names_from_ids(model, id_string):
+    
+    # Converts comma-separated string of Ids (eg "1,2") into a list of names from the corresponding Database table.
+   
+    if not id_string: 
+        return []
+    try:
+        # converts "1, 2" -> [1, 2]
+        id_list = [int(x.strip()) for x in id_string.split(',') if x.strip().isdigit()]
+        if not id_list:
+            return []
+    
+        # Query the database for matches
+        items = model.query.filter(model.id.in_(id_list)).all()
+        return [item.name for item in items]
+    except Exception as e:
+        print(f"Error resolving names for IDs {id_string}: {e}")
+        return []
+    
+
+
 
 # 1. student registration schema
 class StudentRegisterSchema(Schema):
