@@ -1,29 +1,19 @@
 <template>
-<NavbarStructure>
-  <button class="btn btn-primary" type="button" @click="handleLogout()">Logout</button>
-</NavbarStructure>
+  <DashboardLayout :menuLinks="companyMenu">
+    <router-view v-slot="{ Component }">
+      <transition name="fade" mode="out-in"><component :is="Component" /></transition>
+    </router-view>
+  </DashboardLayout>
 </template>
 
 <script setup>
-import NavbarStructure from '@/components/NavbarStructure.vue';
-import axios from 'axios';
-import { useAuthStore } from '@/stores/authStore';
-import { useRouter } from 'vue-router';
-import { useToastNotifications } from '@/composables/useToastNotification';
-
-const authStore = useAuthStore();
-const router = useRouter();
-const { addToastNotifications } = useToastNotifications();
-
-const handleLogout = async () => {
-  try {
-    await axios.post('/api/logout');
-  } catch (error) {
-    console.warn("Logout error:", error);
-  } finally {
-    authStore.logout();
-    router.push('/');
-    addToastNotifications('Logged out', 'success');
-  }
-};
+import DashboardLayout from '@/components/DashboardLayout.vue';
+const companyMenu = [
+  { name: 'Dashboard', icon: 'bi bi-grid-1x2-fill', route: '/company-dashboard' },
+  { name: 'Manage Drives', icon: 'bi bi-briefcase-fill', route: '/company-dashboard/drives' },
+  { name: 'Applicants', icon: 'bi bi-people-fill', route: '/company-dashboard/applicants' },
+  { name: 'Company Profile', icon: 'bi bi-building', route: '/company-dashboard/profile' },
+  { name: 'Stats', icon: 'bi bi-bar-chart-line-fill', route: '/company-dashboard/stats' }
+];
 </script>
+<style scoped>.fade-enter-active, .fade-leave-active { transition: opacity 0.2s ease; } .fade-enter-from, .fade-leave-to { opacity: 0; transform: translateY(10px); }</style>

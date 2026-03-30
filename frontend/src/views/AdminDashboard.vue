@@ -1,34 +1,18 @@
 <template>
-  <div class="container mt-5 text-center">
-    <h1 class="text-danger">Admin Control Panel</h1>
-    <p>Welcome, Superuser. You have full system access.</p>
-
-    <button class="btn btn-outline-danger mt-4" @click="handleLogout">
-      Logout
-    </button>
-  </div>
+  <DashboardLayout :menuLinks="adminMenu">
+    <router-view v-slot="{ Component }">
+      <transition name="fade" mode="out-in"><component :is="Component" /></transition>
+    </router-view>
+  </DashboardLayout>
 </template>
 
 <script setup>
-import axios from 'axios';
-import { useAuthStore } from '@/stores/authStore';
-import { useRouter } from 'vue-router';
-import { useToastNotifications } from '@/composables/useToastNotification';
-
-const authStore = useAuthStore();
-const router = useRouter();
-const { addToastNotifications } = useToastNotifications();
-
-
-const handleLogout = async () => {
-  try {
-    await axios.post('/api/logout');
-  } catch (error) {
-    console.warn("Logout error:", error);
-  } finally {
-    authStore.logout();
-    router.push('/');
-    addToastNotifications('Logged out', 'success');
-  }
-};
+import DashboardLayout from '@/components/DashboardLayout.vue';
+const adminMenu = [
+  { name: 'Dashboard', icon: 'bi bi-grid-1x2-fill', route: '/admin-dashboard' },
+  { name: 'Companies', icon: 'bi bi-buildings-fill', route: '/admin-dashboard/companies' },
+  { name: 'Students', icon: 'bi bi-mortarboard-fill', route: '/admin-dashboard/students' },
+  { name: 'Placement Drives', icon: 'bi bi-briefcase-fill', route: '/admin-dashboard/drives' }
+];
 </script>
+<style scoped>.fade-enter-active, .fade-leave-active { transition: opacity 0.2s ease; } .fade-enter-from, .fade-leave-to { opacity: 0; transform: translateY(10px); }</style>

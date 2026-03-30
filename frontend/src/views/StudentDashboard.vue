@@ -1,35 +1,32 @@
 <template>
-<NavbarStructure>
-  <button class="btn btn-primary" type="button" @click="handleLogout()">Logout</button>
-</NavbarStructure>
+  <DashboardLayout :menuLinks="studentMenu">
+    <!-- Nested views (Home, Drives, Apps, Stats, Profile) inject here -->
+    <router-view v-slot="{ Component }">
+      <transition name="fade" mode="out-in">
+        <component :is="Component" />
+      </transition>
+    </router-view>
+  </DashboardLayout>
 </template>
 
 <script setup>
-import NavbarStructure from '@/components/NavbarStructure.vue';
-import axios from 'axios';
-import { useAuthStore } from '@/stores/authStore';
-import { useRouter } from 'vue-router';
-import { useToastNotifications } from '@/composables/useToastNotification';
+import DashboardLayout from '@/components/DashboardLayout.vue';
 
-const authStore = useAuthStore();
-const router = useRouter();
-const { addToastNotifications } = useToastNotifications();
-
-const handleLogout = async () => {
-  try {
-    await axios.post('/api/logout');
-  } catch (error) {
-    console.warn("Logout error:", error);
-  } finally {
-    authStore.logout();
-    router.push('/');
-    addToastNotifications('Logged out', 'success');
-  }
-};
+const studentMenu = [
+  { name: 'Home', icon: 'bi bi-house-door-fill', route: '/student-dashboard' },
+  { name: 'Drives', icon: 'bi bi-briefcase-fill', route: '/student-dashboard/drives' },
+  { name: 'Applications', icon: 'bi bi-file-earmark-text-fill', route: '/student-dashboard/applications' },
+  { name: 'Stats', icon: 'bi bi-bar-chart-line-fill', route: '/student-dashboard/stats' },
+  { name: 'Profile', icon: 'bi bi-person-lines-fill', route: '/student-dashboard/profile' }
+];
 </script>
 
 <style scoped>
-.back {
-  background: linear-gradient(135deg, #83b0d3 0%, #86c8a9 100%);
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.fade-enter-from, .fade-leave-to {
+  opacity: 0;
+  transform: translateY(10px);
 }
 </style>
