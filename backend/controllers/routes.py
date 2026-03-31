@@ -338,3 +338,204 @@ def confirm_password_reset():
     db.session.commit()
     
     return jsonify({"message": "Password successfully reset!"}), 200
+
+
+
+
+
+# ==========================================================================================
+# ADMIN ENDPOINTS
+# ==========================================================================================
+
+# ----------------- 1. ADMIN DASHBOARD -----------------
+
+@app.route('/api/admin/dashboard', methods=['GET'])
+@auth_required('session')
+def admin_dashboard():
+    if not current_user.has_role('admin'): 
+        return jsonify({"error": "Unauthorized"}), 403
+        
+    total_students = StudentProfile.query.count()
+    total_companies = Company.query.count()
+    total_drives = PlacementDrive.query.count()
+    
+    pending_companies = Company.query.filter_by(is_approved=False).count()
+    pending_drives = PlacementDrive.query.filter_by(is_approved=False).count()
+    
+    app_stats = db.session.query(Application.status, db.func.count(Application.application_id)).group_by(Application.status).all()
+    chart_status = {status.name: count for status, count in app_stats}
+    
+    return jsonify({
+        "stats": {
+            "total_students": total_students,
+            "total_companies": total_companies,
+            "total_drives": total_drives,
+            "pending_companies": pending_companies,
+            "pending_drives": pending_drives
+        },
+        "charts": {
+            "application_status": chart_status
+        }
+    }), 200
+
+
+# ----------------- 2. MANAGE COMPANIES -----------------
+
+# GET COMPANIES
+@app.route('/api/admin/companies', methods=['GET'])
+@auth_required('session')
+def admin_get_companies():
+    if not current_user.has_role('admin'): 
+        return jsonify({"error": "Unauthorized"}), 403
+        
+    companies = Company.query.all()
+    companies_data = []
+    
+    for c in companies:
+        is_complete = bool(c.website and c.description and c.industry and c.hr_contact)
+        companies_data.append({
+            "id": c.company_id, 
+            "name": c.name, 
+            "industry": c.industry, 
+            "hr_contact": c.hr_contact, 
+            "is_approved": c.is_approved, 
+            "is_active": c.user.active, 
+            "user_id": c.user_id,
+            "description": c.description,
+            "website": c.website,
+            "is_profile_complete": is_complete
+        })
+        
+    return jsonify(companies_data), 200
+
+# APPROVE COMPANY
+@app.route('/api/admin/companies/<int:company_id>/approve', methods=['PUT'])
+@auth_required('session')
+def admin_approve_company(company_id):
+    if not current_user.has_role('admin'): 
+        return jsonify({"error": "Unauthorized"}), 403
+        
+    company = Company.query.get_or_404(company_id)
+    
+    # check if required fields are present
+    if not company.website or not company.description or not company.industry:
+        return jsonify({"error": "Cannot approve. Company has missing required profile fields."}), 400
+        
+    company.is_approved = True
+    db.session.commit()
+    
+    return jsonify({"message": "Company approved successfully!"}), 200
+
+# TOGGLE BLACKLIST
+@app.route('/api/admin/users/<int:user_id>/blacklist', methods=['PUT'])
+@auth_required('session')
+def admin_toggle_blacklist(user_id):
+    if not current_user.has_role('admin'): 
+        return jsonify({"error": "Unauthorized"}), 403
+        
+    user = User.query.get_or_404(user_id)
+    user.active = not user.active
+    db.session.commit()
+    
+    status = 'restored' if user.active else 'blacklisted'
+    return jsonify({"message": f"User account has been {status}."}), 200
+
+
+# ----------------- 3. MANAGE STUDENTS -----------------
+
+# GET STUDENTS
+@app.route('/api/admin/students', methods=['GET'])
+@auth_required('session')
+def admin_get_students():
+    if not current_user.has_role('admin'): 
+        return jsonify({"error": "Unauthorized"}), 403
+        
+    students = StudentProfile.query.all()
+    students_data = []
+    
+    for s in students:
+        edu = s.educations[0] if s.educations else None
+        prog = Program.query.get(edu.program_id) if edu and edu.program_id else None
+        
+        cgpa_val = float(edu.cgpa) if edu and edu.cgpa else None
+        is_complete = bool(s.age and s.resume_url and cgpa_val and edu.start_year and edu.end_year)
+        
+        students_data.append({
+            "id": s.student_id, 
+            "name": s.full_name, 
+            "email": s.user.email, 
+            "degree": prog.degree.name if prog else "N/A", 
+            "stream": prog.stream.name if prog else "N/A", 
+            "cgpa": cgpa_val, 
+            "verified_edu": edu.verified_edu if edu else False, 
+            "is_active": s.user.active, 
+            "user_id": s.user_id,
+            "is_profile_complete": is_complete
+        })
+        
+    return jsonify(students_data), 200
+
+# VERIFY STUDENT
+@app.route('/api/admin/students/<int:student_id>/verify', methods=['PUT'])
+@auth_required('session')
+def admin_verify_student(student_id):
+    if not current_user.has_role('admin'): 
+        return jsonify({"error": "Unauthorized"}), 403
+        
+    student = StudentProfile.query.get_or_404(student_id)
+    edu = student.educations[0] if student.educations else None
+    
+    # check for missing data before verifying
+    if not edu or not edu.cgpa or not edu.start_year or not edu.end_year or not student.age or not student.resume_url:
+        return jsonify({"error": "Cannot verify. Student has missing personal or academic data."}), 400
+        
+    edu.verified_edu = True
+    db.session.commit()
+    
+    return jsonify({"message": "Student education verified successfully."}), 200
+
+
+# ----------------- 4. MANAGE DRIVES -----------------
+
+# GET DRIVES
+@app.route('/api/admin/drives', methods=['GET'])
+@auth_required('session')
+def admin_get_drives():
+    if not current_user.has_role('admin'): 
+        return jsonify({"error": "Unauthorized"}), 403
+        
+    drives = PlacementDrive.query.all()
+    drives_data = []
+    
+    for d in drives:
+        drives_data.append({
+            "id": d.drive_id, 
+            "company": d.company.name, 
+            "role": d.job_title, 
+            "deadline": safe_format_date(d.deadline), 
+            "is_approved": d.is_approved, 
+            "is_active": d.is_active,
+            "description": d.job_description,
+            "min_cgpa": float(d.min_cgpa) if d.min_cgpa else "No Minimum",
+            "degree_names": get_names_from_ids(Degree, d.allowed_degrees),
+            "stream_names": get_names_from_ids(Stream, d.allowed_streams)
+        })
+        
+    return jsonify(drives_data), 200
+
+# APPROVE DRIVE
+@app.route('/api/admin/drives/<int:drive_id>/approve', methods=['PUT'])
+@auth_required('session')
+def admin_approve_drive(drive_id):
+    if not current_user.has_role('admin'): 
+        return jsonify({"error": "Unauthorized"}), 403
+        
+    drive = PlacementDrive.query.get_or_404(drive_id)
+    
+    if drive.deadline < datetime.now().date():
+        return jsonify({"error": "Cannot approve a drive with a past deadline."}), 400
+        
+    drive.is_approved = True
+    db.session.commit()
+    
+    return jsonify({"message": "Placement drive approved for students."}), 200
