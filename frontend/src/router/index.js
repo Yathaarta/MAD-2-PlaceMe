@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import LandingPage from '@/views/LandingPage.vue'
 import { useAuthStore } from '@/stores/authStore'
+import NotFound from '@/views/NotFound.vue'
 
 import StudentDashboard from '@/views/StudentDashboard.vue'
 import CompanyDashboard from '@/views/CompanyDashboard.vue'
@@ -24,7 +25,7 @@ const router = createRouter({
         component: StudentDashboard,
         meta: { requiresAuth: true, role: 'student' },
       },
-      
+
       // --- COMPANY ROUTES ---
       {
         path: '/company-dashboard',
@@ -45,7 +46,7 @@ const router = createRouter({
         ]
       },
 
-      { path: '/:pathMatch(.*)*', name: 'NotFound', component: LandingPage }
+      { path: '/:pathMatch(.*)*', name: 'NotFound', component: NotFound }
     ]
 })
 
