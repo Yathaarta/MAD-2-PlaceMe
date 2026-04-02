@@ -12,7 +12,12 @@
 
     <div v-if="step >= 2" class="mb-3 animate-slide-down">
       <label class="col-form-label text-white">Enter New Password:</label>
-      <input v-model="form.newPassword" type="password" class="form-control bg-darkgray" required/>
+      <div class="input-group">
+        <input v-model="form.newPassword" :type="pwdType" class="form-control bg-darkgray" required/>
+        <button class="btn btn-outline-secondary" type="button" @click="togglePwd">
+          <i class="bi" :class="pwdIcon"></i>
+        </button>
+      </div>
     </div>
 
     <div class="mt-5 d-flex gap-3 justify-content-end align-items-center mb-lg-5">
@@ -32,9 +37,11 @@
 import { ref, reactive } from 'vue';
 import axios from 'axios';
 import { useToastNotifications } from '@/composables/useToastNotification';
+import { usePasswordVisibility } from '@/composables/usePasswordVisibility';
 
 const emit = defineEmits(['backToLogin']);
 const { addToastNotifications } = useToastNotifications();
+const { inputType: pwdType, iconClass: pwdIcon, toggleVisibility: togglePwd } = usePasswordVisibility();
 
 const step = ref(1); // 1: Enter Email, 2: Enter OTP & New Password
 const requiresOtp = ref(true);
