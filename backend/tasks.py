@@ -122,6 +122,6 @@ def export_company_applicants_csv(company_id, email, company_name):
         except Exception as e:
             print(f"Failed to send CSV export email: {e}")
             
-        # os.remove(filepath)
+        os.remove(filepath)
             
         return filepath

@@ -9,7 +9,7 @@
         <span class="input-group-text bg-white border-0" style="margin-right: -0.7rem;"><i class="bi bi-search text-muted"></i></span>
         <input
           type="text"
-          class="form-control border-0 bg-white shadow-none -2"
+          class="form-control border-0 bg-white shadow-none"
           :placeholder="searchPlaceholder"
           :value="searchQuery"
           @input="$emit('update:searchQuery', $event.target.value)"
@@ -40,14 +40,14 @@ defineProps({
   title: { type: String, required: true },
 
   // Search Props
-  showSearch: { type: Boolean, default: true },
+  showSearch: { type: Boolean, default: false },
   searchPlaceholder: { type: String, default: 'Search...' },
   searchQuery: { type: String, default: '' },
 
   // Filter Props
   filterOptions: {
     type: Array,
-    default: () => []  // Array like { label: 'Approved', value: 'approved' }
+    default: () => [] // Array of { label: 'Approved', value: 'approved' }
   },
   filterValue: { type: String, default: 'all' }
 });

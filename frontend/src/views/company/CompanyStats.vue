@@ -120,6 +120,4 @@ const chartOptions = {
     }
   }
 };
-
-onMounted(fetchStats);
 </script>
