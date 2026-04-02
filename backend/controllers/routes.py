@@ -14,7 +14,7 @@ import random
 import redis
 
 # IMPORT OUR CELERY TASKS
-from tasks import send_otp_email
+from tasks import send_otp_email, export_company_applicants_csv
 
 # ---------------------- INITIALIZE REDIS CLIENT ----------------------
 
@@ -341,8 +341,6 @@ def confirm_password_reset():
 
 
 
-
-
 # ==========================================================================================
 # ADMIN ENDPOINTS
 # ==========================================================================================
@@ -539,3 +537,270 @@ def admin_approve_drive(drive_id):
     db.session.commit()
     
     return jsonify({"message": "Placement drive approved for students."}), 200
+
+
+
+# ==========================================================================================
+# COMPANY ENDPOINTS
+# ==========================================================================================
+
+# ----------------- 1. COMPANY DASHBOARD -----------------
+
+@app.route('/api/dashboard/company', methods=['GET'])
+@auth_required('session')
+def company_dashboard_data():
+    if not current_user.has_role('company'): 
+        return jsonify({"error": "Unauthorized"}), 403
+        
+    company = current_user.company_profile
+    drives = PlacementDrive.query.filter_by(company_id=company.company_id).all()
+    
+    total_drives = len(drives)
+    active_drives = sum(1 for d in drives if d.is_active)
+    total_applicants = sum(len(d.applications) for d in drives)
+    
+    recent_drives = sorted(drives, key=lambda x: x.created_at, reverse=True)[:3]
+    recent_drives_data = []
+    
+    chart_drives = {d.job_title: len(d.applications) for d in drives if len(d.applications) > 0}
+    
+    for d in recent_drives:
+        recent_drives_data.append({
+            "id": d.drive_id, 
+            "role": d.job_title, 
+            "deadline": safe_format_date(d.deadline), 
+            "is_approved": d.is_approved, 
+            "applicants": len(d.applications)
+        })
+
+    return jsonify({
+        "company": {
+            "name": company.name, 
+            "industry": company.industry, 
+            "is_approved": company.is_approved
+        },
+        "stats": {
+            "total_drives": total_drives, 
+            "active_drives": active_drives, 
+            "total_applicants": total_applicants
+        },
+        "recent_drives": recent_drives_data,
+        "charts": {"applicants_per_drive": chart_drives}
+    }), 200
+
+
+# ----------------- 2. MANAGE DRIVES -----------------
+
+@app.route('/api/company/drives', methods=['GET', 'POST'])
+@auth_required('session')
+def manage_company_drives():
+    if not current_user.has_role('company'): 
+        return jsonify({"error": "Unauthorized"}), 403
+        
+    company = current_user.company_profile
+
+    # get all drives
+    if request.method == 'GET':
+        drives = PlacementDrive.query.filter_by(company_id=company.company_id).order_by(PlacementDrive.created_at.desc()).all()
+        
+        drives_data = []
+        for d in drives:
+            drives_data.append({
+                "id": d.drive_id, 
+                "role": d.job_title, 
+                "description": d.job_description,
+                "min_cgpa": float(d.min_cgpa) if d.min_cgpa else None, 
+                "deadline": safe_format_date(d.deadline), 
+                "is_active": d.is_active, 
+                "is_approved": d.is_approved, 
+                "applicants": len(d.applications),
+                # resolving names for the detailed edit modal
+                "degree_names": get_names_from_ids(Degree, d.allowed_degrees),
+                "stream_names": get_names_from_ids(Stream, d.allowed_streams)
+            })
+            
+        return jsonify(drives_data), 200
+
+    # create new drive
+    if request.method == 'POST':
+        if not company.is_approved: 
+            return jsonify({"error": "Company not approved by Admin."}), 403
+            
+        data = request.get_json()
+        deadline_date = datetime.strptime(data['deadline'], '%Y-%m-%d').date()
+        
+        # check if deadline is in the past
+        if deadline_date < datetime.now().date():
+            return jsonify({"error": "Deadline cannot be in the past."}), 400
+            
+        new_drive = PlacementDrive(
+            company_id=company.company_id, 
+            job_title=data['job_title'], 
+            job_description=data.get('job_description', ''),
+            min_cgpa=data.get('min_cgpa'), 
+            allowed_degrees=data.get('allowed_degrees', ''), 
+            allowed_streams=data.get('allowed_streams', ''),
+            deadline=deadline_date, 
+            is_active=True, 
+            is_approved=False
+        )
+        db.session.add(new_drive)
+        db.session.commit()
+        
+        return jsonify({"message": "Drive submitted! Pending Admin Approval."}), 201
+
+# UPDATE DRIVE
+@app.route('/api/company/drives/<int:drive_id>', methods=['PUT'])
+@auth_required('session')
+def update_company_drive(drive_id):
+    if not current_user.has_role('company'): 
+        return jsonify({"error": "Unauthorized"}), 403
+        
+    company = current_user.company_profile
+    drive = PlacementDrive.query.get_or_404(drive_id)
+    
+    if drive.company_id != company.company_id:
+        return jsonify({"error": "Unauthorized action."}), 403
+        
+    data = request.get_json()
+    
+    # toggle active status (end drive early)
+    if 'is_active' in data:
+        drive.is_active = data['is_active']
+        db.session.commit()
+        
+        msg = "closed early" if not drive.is_active else "re-activated"
+        return jsonify({"message": f"Drive has been successfully {msg}."}), 200
+    
+    # update job description
+    if 'job_description' in data:
+        drive.job_description = data['job_description']
+        
+    # extend deadline
+    if 'deadline' in data:
+        new_deadline = datetime.strptime(data['deadline'], '%Y-%m-%d').date()
+        
+        if new_deadline < datetime.now().date():
+            return jsonify({"error": "New deadline cannot be in the past."}), 400
+            
+        drive.deadline = new_deadline
+        
+    db.session.commit()
+    return jsonify({"message": "Drive updated successfully."}), 200
+
+
+# ----------------- 3. APPLICATIONS & PROFILE -----------------
+
+# GET APPLICATIONS
+@app.route('/api/company/applications', methods=['GET'])
+@auth_required('session')
+def get_company_applications():
+    if not current_user.has_role('company'): 
+        return jsonify({"error": "Unauthorized"}), 403
+        
+    company = current_user.company_profile
+    apps_data = []
+    
+    for drive in company.drives:
+        for app in drive.applications:
+            student = app.student
+            edu = student.educations[0] if student.educations else None
+            prog = Program.query.get(edu.program_id) if edu and edu.program_id else None
+            
+            apps_data.append({
+                "id": app.application_id, 
+                "drive_role": drive.job_title, 
+                "student_name": student.full_name, 
+                "student_email": student.user.email,
+                "resume_url": student.resume_url, 
+                "cgpa": float(edu.cgpa) if edu and edu.cgpa else "N/A",
+                "degree": prog.degree.name if prog else "N/A", 
+                "stream": prog.stream.name if prog else "N/A",
+                "status": app.status.value, 
+                "applied_on": safe_format_date(app.created_at),
+                "is_blacklisted": not student.user.active,
+                # extra details for candidate modal
+                "age": int(student.age) if student.age else None,
+                "start_year": safe_format_date(edu.start_year) if edu else "N/A",
+                "end_year": safe_format_date(edu.end_year) if edu else "N/A"
+            })
+            
+    apps_data.sort(key=lambda x: x['id'], reverse=True)
+    return jsonify(apps_data), 200
+
+# UPDATE APP STATUS
+@app.route('/api/company/applications/<int:app_id>', methods=['PUT'])
+@auth_required('session')
+def update_application_status(app_id):
+    if not current_user.has_role('company'): 
+        return jsonify({"error": "Unauthorized"}), 403
+        
+    application = Application.query.get_or_404(app_id)
+    
+    if application.drive.company_id != current_user.company_profile.company_id: 
+        return jsonify({"error": "Unauthorized action."}), 403
+        
+    if not application.student.user.active:
+        return jsonify({"error": "Cannot update status. Student account is suspended by Admin."}), 403
+        
+    data = request.get_json()
+    
+    try:
+        new_status = ApplicationStatus[data.get('status', '').upper()]
+        application.status = new_status
+        db.session.commit()
+        return jsonify({"message": "Status updated successfully."}), 200
+        
+    except KeyError: 
+        return jsonify({"error": "Invalid status."}), 400
+
+# MANAGE PROFILE
+@app.route('/api/company/profile', methods=['GET', 'PUT'])
+@auth_required('session')
+def manage_company_profile():
+    if not current_user.has_role('company'): 
+        return jsonify({"error": "Unauthorized"}), 403
+        
+    company = current_user.company_profile
+    
+    # get company profile
+    if request.method == 'GET':
+        return jsonify({
+            "name": company.name, 
+            "email": current_user.email, 
+            "industry": company.industry or "", 
+            "hr_contact": company.hr_contact or "", 
+            "website": company.website or "", 
+            "description": company.description or "", 
+            "is_approved": company.is_approved
+        }), 200
+    
+    # update company profile
+    if request.method == 'PUT':
+        data = request.get_json()
+        
+        company.name = data.get('name', company.name)
+        company.industry = data.get('industry', company.industry)
+        company.hr_contact = data.get('hr_contact', company.hr_contact)
+        company.website = data.get('website', company.website)
+        company.description = data.get('description', company.description)
+        
+        db.session.commit()
+        return jsonify({"message": "Profile updated successfully!", "name": company.name}), 200
+
+# EXPORT CSV
+@app.route('/api/company/export-applicants', methods=['POST'])
+@auth_required('session')
+@email_verification_required
+def export_applicants():
+    if not current_user.has_role('company'): 
+        return jsonify({"error": "Unauthorized"}), 403
+        
+    company = current_user.company_profile
+    
+    # trigger background task
+    export_company_applicants_csv.delay(company.company_id, current_user.email, company.name)
+    
+    return jsonify({
+        "message": "CSV Export started! Check your email for the attachment soon."
+    }), 200
