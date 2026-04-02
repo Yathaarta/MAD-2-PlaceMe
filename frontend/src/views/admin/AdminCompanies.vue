@@ -74,7 +74,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, computed } from 'vue';
 import axios from 'axios';
 import { Modal } from 'bootstrap';
 import { useToastNotifications } from '@/composables/useToastNotification';
@@ -82,28 +82,16 @@ import BaseModal from '@/components/BaseModal.vue';
 import DataTable from '@/components/DataTable.vue';
 import EmptyState from '@/components/EmptyState.vue';
 import PageHeaderFilters from '@/components/PageHeaderFilters.vue';
+import { useFetchData } from '@/composables/useFetchData';
 
 const { addToastNotifications } = useToastNotifications();
-const companies = ref([]);
-const isLoading = ref(true);
+const { data: companies, isLoading, fetchData: fetchCompanies } = useFetchData('/api/admin/companies','Failed to load the company directory.');
+
 const searchQuery = ref('');
 const statusFilter = ref('all');
 
 const selectedCompany = ref(null);
 let detailsModal = null;
-
-const fetchCompanies = async () => {
-  isLoading.value = true;
-  try {
-    const res = await axios.get('/api/admin/companies');
-    companies.value = res.data;
-  } catch (err) {
-    addToastNotifications("Failed to load companies", "error");
-    console.error(err);
-  } finally {
-    isLoading.value = false;
-  }
-};
 
 const filteredCompanies = computed(() => {
   return companies.value.filter(c => {
@@ -148,8 +136,6 @@ const toggleBlacklist = async (c) => {
     addToastNotifications("Error updating user status", "error");
   }
 };
-
-onMounted(fetchCompanies);
 </script>
 
 <style scoped>

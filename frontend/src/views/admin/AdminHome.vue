@@ -60,9 +60,9 @@
 <script setup>
 import { onMounted, nextTick } from 'vue';
 import Chart from 'chart.js/auto';
-import { useAdminDashboard } from '@/composables/useAdminDashboard';
+import { useFetchData } from '@/composables/useFetchData';
 
-const { dashboardData, isLoading, fetchDashboardData } = useAdminDashboard();
+const { data: dashboardData, isLoading, fetchData: fetchDashboardData } = useFetchData('/api/admin/dashboard','Failed to load Admin dashboard data.')
 
 onMounted(async () => {
   await fetchDashboardData();

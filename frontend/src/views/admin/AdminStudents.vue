@@ -101,7 +101,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, computed } from 'vue';
 import axios from 'axios';
 import { Modal } from 'bootstrap';
 import { useToastNotifications } from '@/composables/useToastNotification';
@@ -109,28 +109,16 @@ import DataTable from '@/components/DataTable.vue';
 import EmptyState from '@/components/EmptyState.vue';
 import BaseModal from '@/components/BaseModal.vue';
 import PageHeaderFilters from '@/components/PageHeaderFilters.vue';
+import { useFetchData } from '@/composables/useFetchData';
 
 const { addToastNotifications } = useToastNotifications();
-const students = ref([]);
-const isLoading = ref(true);
+const { data: students, isLoading, fetchData: fetchStudents } = useFetchData('/api/admin/students','Failed to load the student directory.');
+
 const searchQuery = ref('');
 const statusFilter = ref('all');
 
 const selectedStudent = ref(null);
 let detailsModal = null;
-
-const fetchStudents = async () => {
-  isLoading.value = true;
-  try {
-    const res = await axios.get('/api/admin/students');
-    students.value = res.data;
-  } catch (err) {
-    addToastNotifications("Failed to load students", "error");
-    console.error(err);
-  } finally {
-    isLoading.value = false;
-  }
-};
 
 const filteredStudents = computed(() => {
   return students.value.filter(s => {
@@ -176,8 +164,6 @@ const toggleBlacklist = async (s) => {
     addToastNotifications("Error updating user status", "error");
   }
 };
-
-onMounted(fetchStudents);
 </script>
 
 <style scoped>

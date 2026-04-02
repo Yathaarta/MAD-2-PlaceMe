@@ -135,7 +135,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, computed } from 'vue';
 import axios from 'axios';
 import { Modal } from 'bootstrap';
 import { useToastNotifications } from '@/composables/useToastNotification';
@@ -143,28 +143,15 @@ import DataTable from '@/components/DataTable.vue';
 import EmptyState from '@/components/EmptyState.vue';
 import BaseModal from '@/components/BaseModal.vue';
 import PageHeaderFilters from '@/components/PageHeaderFilters.vue';
+import { useFetchData } from '@/composables/useFetchData';
 
 const { addToastNotifications } = useToastNotifications();
-const drives = ref([]);
-const isLoading = ref(true);
+const { data: drives, isLoading, fetchData: fetchDrives } = useFetchData('/api/admin/drives','Failed to fetch placement drives.');
+
 const searchQuery = ref('');
 const statusFilter = ref('all');
-
 const selectedDrive = ref(null);
 let detailsModal = null;
-
-const fetchDrives = async () => {
-  isLoading.value = true;
-  try {
-    const res = await axios.get('/api/admin/drives');
-    drives.value = res.data;
-  } catch (err) {
-    addToastNotifications("Failed to fetch placement drives. Please try again.", "error");
-    console.error("Drives Fetch Error:", err);
-  } finally {
-    isLoading.value = false;
-  }
-};
 
 const filteredDrives = computed(() => {
   return drives.value.filter(d => {
@@ -205,8 +192,6 @@ const approve = async (id) => {
     console.error("Approve Drive Error:", err);
   }
 };
-
-onMounted(fetchDrives);
 </script>
 
 <style scoped>
