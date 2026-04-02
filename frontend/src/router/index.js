@@ -12,6 +12,14 @@ import AdminCompanies from '@/views/admin/AdminCompanies.vue'
 import AdminStudents from '@/views/admin/AdminStudents.vue'
 import AdminDrives from '@/views/admin/AdminDrives.vue'
 
+// Company Views
+import CompanyHome from '@/views/company/CompanyHome.vue'
+import CompanyDrives from '@/views/company/CompanyDrives.vue'
+import CompanyApplicants from '@/views/company/CompanyApplicants.vue'
+import CompanyProfile from '@/views/company/CompanyProfile.vue'
+import CompanyStats from '../views/company/CompanyStats.vue'
+
+
 const router = createRouter({
     history: createWebHistory(),
     routes: [
@@ -25,14 +33,19 @@ const router = createRouter({
         component: StudentDashboard,
         meta: { requiresAuth: true, role: 'student' },
       },
-
       // --- COMPANY ROUTES ---
       {
         path: '/company-dashboard',
         component: CompanyDashboard,
         meta: { requiresAuth: true, role: 'company' },
+        children: [
+          { path: '', name: 'CompanyHome', component: CompanyHome },
+          { path: 'drives', name: 'CompanyDrives', component: CompanyDrives },
+          { path: 'applicants', name: 'CompanyApplicants', component: CompanyApplicants },
+          { path: 'profile', name: 'CompanyProfile', component: CompanyProfile },
+          { path: 'stats', name: 'CompanyStats', component: CompanyStats}
+        ]
       },
-
       // --- ADMIN ROUTES ---
       {
         path: '/admin-dashboard',

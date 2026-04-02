@@ -40,7 +40,7 @@
         </td>
       </tr>
       <template #empty v-if="filteredStudents.length === 0">
-        <EmptyState icon="bi-person" title="No students found matching your filters." />
+        <EmptyState icon="bi-person" title="No students found." />
       </template>
     </DataTable>
 

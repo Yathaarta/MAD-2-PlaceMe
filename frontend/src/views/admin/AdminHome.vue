@@ -62,7 +62,7 @@ import { onMounted, nextTick } from 'vue';
 import Chart from 'chart.js/auto';
 import { useFetchData } from '@/composables/useFetchData';
 
-const { data: dashboardData, isLoading, fetchData: fetchDashboardData } = useFetchData('/api/admin/dashboard','Failed to load Admin dashboard data.')
+const { data: dashboardData, isLoading, fetchData: fetchDashboardData } = useFetchData('/api/admin/dashboard','Failed to load Admin dashboard data.', true)
 
 onMounted(async () => {
   await fetchDashboardData();
@@ -93,7 +93,14 @@ onMounted(async () => {
               ],
               borderWidth: 2
             }]
-          }
+          },
+          options: {
+              plugins: {
+                legend: {
+                  position: 'bottom'
+                }
+              }
+            }
         });
       }
     });

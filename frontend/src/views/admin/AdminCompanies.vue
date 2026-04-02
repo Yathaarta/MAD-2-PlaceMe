@@ -38,7 +38,7 @@
         </td>
       </tr>
       <template #empty v-if="filteredCompanies.length === 0">
-        <EmptyState icon="bi-building" title="No companies found matching your filters."></EmptyState>
+        <EmptyState icon="bi-building" title="No companies found."></EmptyState>
       </template>
     </DataTable>
 
