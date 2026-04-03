@@ -167,7 +167,6 @@
           <div class="col-12">
             <label class="form-label fw-bold">Update Job Description & Instructions</label>
             <textarea class="form-control bg-light border-0 py-2" v-model="editForm.job_description" rows="8" style="white-space: pre-wrap;" :disabled="!editForm.is_active"></textarea>
-            <small class="text-muted">Preserves paragraphs and line breaks.</small>
           </div>
         </div>
 

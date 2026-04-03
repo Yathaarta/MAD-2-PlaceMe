@@ -57,14 +57,14 @@
 </template>
 
 <script setup>
-import { onMounted, computed } from 'vue';
+import { computed } from 'vue';
 import { Bar } from 'vue-chartjs';
 import { Chart as ChartJS, Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale } from 'chart.js';
 import { useFetchData } from '@/composables/useFetchData';
 
 ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale);
 
-const { data: statsData, isLoading, fetchData: fetchStats } = useFetchData('/api/dashboard/company','Failed to load analytics.')
+const { data: statsData, isLoading } = useFetchData('/api/dashboard/company','Failed to load analytics.')
 
 const hasChartData = computed(() => {
   if (!statsData.value.charts || !statsData.value.charts.applicants_per_drive) return false;
