@@ -20,8 +20,8 @@
           :statValue="drive.applicants" statValueClass="text-primary"
         >
           <template #header-left>
-            <span v-if="!drive.is_approved" class="badge bg-warning text-dark">Pending Admin</span>
-            <span v-else-if="!drive.is_active" class="badge bg-danger">Closed Early</span>
+            <span v-if="!drive.is_active" class="badge bg-danger"> {{ getClosedStatus(drive) }}</span>
+            <span v-else-if="!drive.is_approved" class="badge bg-warning text-dark">Pending Admin</span>
             <span v-else class="badge bg-success">Approved & Active</span>
           </template>
 
@@ -191,10 +191,12 @@ import BaseModal from '@/components/BaseModal.vue';
 import DriveCard from '@/components/DriveCard.vue';
 import PageHeaderFilters from '@/components/PageHeaderFilters.vue';
 import { useFetchData } from '@/composables/useFetchData';
+import { useGetDriveStatus } from '@/composables/useGetDriveStatus';
 
 const { addToastNotifications } = useToastNotifications();
 const { data:dashboardData, fetchData:fetchDashboardData } = useFetchData('/api/dashboard/company','Failed to load company data', true);
 const { data: drives, isLoading, fetchData: fetchDrives } = useFetchData('/api/company/drives','Failed to load your placement drives. Please refresh.');
+const { getClosedStatus } = useGetDriveStatus()
 
 const degrees = ref([]);
 const streams = ref([]);

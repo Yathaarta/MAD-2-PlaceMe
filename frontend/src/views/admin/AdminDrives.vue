@@ -33,12 +33,12 @@
         </td>
         <td class="py-3 px-5 text-danger fw-semibold"><i class="bi bi-clock-history me-2"></i>{{ d.deadline }}</td>
         <td class="py-3 px-5">
-          <span v-if="!d.is_approved" class="badge bg-warning text-dark rounded-pill shadow-sm">Pending</span>
-          <span v-else-if="!d.is_active" class="badge bg-danger rounded-pill shadow-sm">Closed Early</span>
+          <span v-if="!d.is_active" class="badge bg-danger rounded-pill shadow-sm">{{ getClosedStatus(d) }}</span>
+          <span v-else-if="!d.is_approved" class="badge bg-warning text-dark rounded-pill shadow-sm">Pending</span>
           <span v-else class="badge bg-success rounded-pill shadow-sm">Approved</span>
         </td>
         <td class="py-3 text-center">
-          <button v-if="!d.is_approved" class="btn btn-sm btn-success rounded-pill fw-semibold shadow-sm"
+          <button v-if="!d.is_approved && d.is_active" class="btn btn-sm btn-success rounded-pill fw-semibold shadow-sm"
             @click.stop="approve(d.id)">
             Approve Drive
           </button>
@@ -144,9 +144,11 @@ import EmptyState from '@/components/EmptyState.vue';
 import BaseModal from '@/components/BaseModal.vue';
 import PageHeaderFilters from '@/components/PageHeaderFilters.vue';
 import { useFetchData } from '@/composables/useFetchData';
+import { useGetDriveStatus } from '@/composables/useGetDriveStatus';
 
 const { addToastNotifications } = useToastNotifications();
 const { data: drives, isLoading, fetchData: fetchDrives } = useFetchData('/api/admin/drives','Failed to fetch placement drives.');
+const { getClosedStatus } = useGetDriveStatus()
 
 const searchQuery = ref('');
 const statusFilter = ref('all');

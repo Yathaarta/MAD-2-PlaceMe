@@ -42,6 +42,25 @@ def internal_server_error(e):
     return jsonify({"error": "Internal Server Error", "status": 500}), 500
 
 
+# ---------------------- Helper Functions ----------------------
+
+def auto_close_expired_drives():
+    # Checks the entire database for active drives that have passed their deadline and permanently sets them to inactive.
+    today = date.today()
+    
+    # Efficiently query ONLY drives that are active but expired
+    expired_drives = PlacementDrive.query.filter(
+        PlacementDrive.is_active == True,
+        PlacementDrive.deadline < today
+    ).all()
+    
+    # If it found any, update them and save the database
+    if expired_drives:
+        for drive in expired_drives:
+            drive.is_active = False
+        db.session.commit()
+
+
 # ==========================================================================================
 # PUBLIC & AUTHENTICATION ENDPOINTS
 # ==========================================================================================
@@ -501,7 +520,8 @@ def admin_verify_student(student_id):
 def admin_get_drives():
     if not current_user.has_role('admin'): 
         return jsonify({"error": "Unauthorized"}), 403
-        
+    
+    auto_close_expired_drives()    
     drives = PlacementDrive.query.all()
     drives_data = []
     
@@ -511,6 +531,7 @@ def admin_get_drives():
             "company": d.company.name, 
             "role": d.job_title, 
             "deadline": safe_format_date(d.deadline), 
+            "updated_at": d.updated_at.isoformat() + "Z",
             "is_approved": d.is_approved, 
             "is_active": d.is_active,
             "description": d.job_description,
@@ -569,6 +590,8 @@ def company_dashboard_data():
             "id": d.drive_id, 
             "role": d.job_title, 
             "deadline": safe_format_date(d.deadline), 
+            "updated_at": d.updated_at.isoformat() + "Z",
+            "is_active": d.is_active,
             "is_approved": d.is_approved, 
             "applicants": len(d.applications)
         })
@@ -599,6 +622,8 @@ def manage_company_drives():
         
     company = current_user.company_profile
 
+    auto_close_expired_drives()    
+
     # get all drives
     if request.method == 'GET':
         drives = PlacementDrive.query.filter_by(company_id=company.company_id).order_by(PlacementDrive.created_at.desc()).all()
@@ -611,6 +636,7 @@ def manage_company_drives():
                 "description": d.job_description,
                 "min_cgpa": float(d.min_cgpa) if d.min_cgpa else None, 
                 "deadline": safe_format_date(d.deadline), 
+                "updated_at": d.updated_at.isoformat() + "Z",
                 "is_active": d.is_active, 
                 "is_approved": d.is_approved, 
                 "applicants": len(d.applications),
@@ -657,20 +683,22 @@ def update_company_drive(drive_id):
         return jsonify({"error": "Unauthorized"}), 403
         
     company = current_user.company_profile
+    auto_close_expired_drives() 
     drive = PlacementDrive.query.get_or_404(drive_id)
     
     if drive.company_id != company.company_id:
         return jsonify({"error": "Unauthorized action."}), 403
+    if not drive.is_active:
+        return jsonify({"error": "Cannot edit this drive. The deadline has already passed."}), 403
         
     data = request.get_json()
     
     # toggle active status (end drive early)
     if 'is_active' in data:
-        drive.is_active = data['is_active']
+        drive.is_active = False
         db.session.commit()
-        
-        msg = "closed early" if not drive.is_active else "re-activated"
-        return jsonify({"message": f"Drive has been successfully {msg}."}), 200
+
+        return jsonify({"message": "Drive closed early."}), 200
     
     # update job description
     if 'job_description' in data:

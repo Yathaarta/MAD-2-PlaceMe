@@ -79,7 +79,8 @@
                 <td class="py-3 text-danger fw-semibold"><i class="bi bi-calendar-x me-1"></i> {{ drive.deadline }}</td>
                 <td class="py-3 fw-bold text-primary">{{ drive.applicants }}</td>
                 <td class="py-3">
-                  <span v-if="!drive.is_approved" class="badge bg-warning text-dark rounded-pill">Pending</span>
+                  <span v-if="!drive.is_active" class="badge bg-danger text-light rounded-pill">{{ getClosedStatus(drive) }}</span>
+                  <span v-else-if="!drive.is_approved" class="badge bg-warning text-dark rounded-pill">Pending</span>
                   <span v-else class="badge bg-success rounded-pill">Approved</span>
                 </td>
               </tr>
@@ -101,5 +102,7 @@
 
 import { useFetchData } from '@/composables/useFetchData';
 const { data:dashboardData, isLoading } = useFetchData('/api/dashboard/company','Failed to load Company dashboard data.', true);
+import { useGetDriveStatus } from '@/composables/useGetDriveStatus';
 
+const { getClosedStatus } = useGetDriveStatus()
 </script>
