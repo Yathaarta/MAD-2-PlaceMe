@@ -62,7 +62,7 @@
                 <h3 class="fw-bold text-dark mb-0">{{ selectedDrive.role }}</h3>
                 <span class="badge bg-danger fw-semibold rounded-pill fs-6"><i class="bi bi-clock me-1"></i> Due: {{ selectedDrive.deadline }}</span>
               </div>
-              <div class="fs-5 text-primary fw-semibold"><i class="bi bi-building me-2"></i>{{ selectedDrive.company }}</div>
+              <div class="fs-6 text-primary fw-semibold"><i class="bi bi-building me-2"></i>{{ selectedDrive.company }}</div>
             </div>
 
             <div class="pt-4">
@@ -77,15 +77,39 @@
               <!-- Eligibility -->
               <h6 class="fw-bold text-muted text-uppercase mb-3 mt-4">Eligibility Requirements</h6>
               <div class="row g-3 p-3 rounded-3 mx-0">
-                 <div class="col-md-6">
-                   <div class="small fw-bold text-muted">Minimum CGPA required:</div>
-                   <div class="fw-bold text-dark fs-5">{{ selectedDrive.eligibility }}</div>
-                 </div>
-                 <div class="col-md-6">
-                   <div class="small fw-bold text-muted">Your Status:</div>
-                   <div v-if="selectedDrive.is_eligible" class="text-success fw-bold"><i class="bi bi-check-circle-fill me-1"></i> Eligible to Apply</div>
-                   <div v-else class="text-danger fw-bold"><i class="bi bi-x-circle-fill me-1"></i> {{ selectedDrive.ineligibility_reason }}</div>
-                 </div>
+                <div class="col-md-6">
+                  <div class="small fw-bold text-muted">Minimum CGPA required:</div>
+                  <div class="fw-semibold text-dark fs-5">{{ selectedDrive.eligibility }}</div>
+                </div>
+                <div class="col-md-6">
+                  <div class="small fw-bold text-muted">Your Status:</div>
+                  <div v-if="selectedDrive.is_eligible" class="text-success fw-semibold"><i
+                      class="bi bi-check-circle-fill me-1"></i> Eligible to Apply</div>
+                  <div v-else class="text-danger fw-semibold"><i class="bi bi-x-circle-fill me-1"></i> {{
+                    selectedDrive.ineligibility_reason }}</div>
+                </div>
+              </div>
+              <div class="row g-3 p-3 rounded-3 mx-0">
+                <div class="col-md-6">
+                  <div class="small fw-bold text-muted mb-1">Targeted Degrees:</div>
+                  <div v-if="selectedDrive.degree_names && selectedDrive.degree_names.length > 0">
+                    <span v-for="deg in selectedDrive.degree_names" :key="deg"
+                      class="badge bg-primary bg-opacity-10 text-primary border border-primary me-2 px-3 py-2 mb-2 rounded-pill shadow-sm">
+                      {{ deg }}
+                    </span>
+                  </div>
+                  <div v-else class="text-muted fst-italic">No specific degrees targeted.</div>
+                </div>
+                <div class="col-md-6">
+                  <div class="small fw-bold text-muted mb-1">Targeted Streams:</div>
+                  <div v-if="selectedDrive.stream_names && selectedDrive.stream_names.length > 0">
+                    <span v-for="stream in selectedDrive.stream_names" :key="stream"
+                      class="badge bg-white text-secondary border border-secondary me-2 px-3 py-2 mb-2 rounded-pill shadow-sm">
+                      {{ stream }}
+                    </span>
+                  </div>
+                  <div v-else class="text-muted fst-italic">No specific streams targeted.</div>
+                </div>
               </div>
 
               <hr class="text-muted opacity-50">

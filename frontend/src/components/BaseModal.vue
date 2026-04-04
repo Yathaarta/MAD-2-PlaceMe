@@ -5,7 +5,7 @@
 
         <!-- Standardized Header -->
         <div class="modal-header border-0 py-3 rounded-top-4" :class="headerClass">
-          <h5 class="modal-title fw-bold">
+          <h5 class="modal-title fw-semibold">
             <i v-if="icon" :class="['bi', icon, 'me-2']"></i> {{ title }}
           </h5>
           <button type="button" class="btn-close" :class="{'btn-close-white': isHeaderDark}" data-bs-dismiss="modal" aria-label="Close"></button>

@@ -48,12 +48,12 @@
         <p class="text-muted mb-4">{{ selectedCompany.industry || 'Industry not specified' }}</p>
         <div class="d-flex flex-lg-row flex-column gap-lg-5 gap-3 py-3 px-2">
           <div class="mb-4">
-            <label class="text-muted small fw-bold text-uppercase">HR Contact Email</label>
+            <label class="text-muted small fw-semibold text-uppercase">HR Contact Email</label>
             <div class="fw-semibold">{{ selectedCompany.hr_contact || 'N/A' }}</div>
           </div>
 
           <div class="mb-4">
-            <label class="text-muted small fw-bold text-uppercase">Official Website</label>
+            <label class="text-muted small fw-semibold text-uppercase">Official Website</label>
             <div v-if="selectedCompany.website"><a :href="selectedCompany.website" target="_blank" class="text-decoration-none">{{ selectedCompany.website }}</a></div>
             <div v-else class="text-danger">Not Provided</div>
           </div>
