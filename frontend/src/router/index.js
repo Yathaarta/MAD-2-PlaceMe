@@ -19,6 +19,13 @@ import CompanyApplicants from '@/views/company/CompanyApplicants.vue'
 import CompanyProfile from '@/views/company/CompanyProfile.vue'
 import CompanyStats from '../views/company/CompanyStats.vue'
 
+// Student Views
+import StudentHome from '@/views/student/StudentHome.vue'
+import StudentDrives from '@/views/student/StudentDrives.vue'
+import StudentApplications from '@/views/student/StudentApplications.vue'
+import StudentStats from '@/views/student/StudentStats.vue'
+import StudentProfile from '@/views/student/StudentProfile.vue'
+
 
 const router = createRouter({
     history: createWebHistory(),
@@ -32,6 +39,13 @@ const router = createRouter({
         path: '/student-dashboard',
         component: StudentDashboard,
         meta: { requiresAuth: true, role: 'student' },
+        children: [
+          { path: '', name: 'StudentHome', component: StudentHome },
+          { path: 'drives', name: 'StudentDrives', component: StudentDrives },
+          { path: 'applications', name: 'StudentApplications', component: StudentApplications },
+          { path: 'stats', name: 'StudentStats', component: StudentStats },
+          { path: 'profile', name: 'StudentProfile', component: StudentProfile }
+        ]
       },
       // --- COMPANY ROUTES ---
       {
