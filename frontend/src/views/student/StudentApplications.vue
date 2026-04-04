@@ -30,8 +30,8 @@
                     'bg-primary bg-opacity-10 text-primary border border-primary': app.status === 'Applied',
                     'bg-info bg-opacity-10 text-info border border-info': app.status === 'Shortlisted',
                     'bg-warning bg-opacity-10 text-warning border border-warning': app.status === 'Interview',
-                    'bg-success text-white shadow-sm': app.status === 'Selected',
-                    'bg-danger text-white shadow-sm': app.status === 'Rejected'
+                    'bg-success bg-opacity-10 border border-success text-success ': app.status === 'Selected',
+                    'bg-danger text-danger bg-opacity-10 border border-danger': app.status === 'Rejected'
                   }">
               {{ app.status }}
             </span>

@@ -946,8 +946,9 @@ def get_student_applications():
             "company_details": {
                 "name": app_record.drive.company.name,
                 "industry": app_record.drive.company.industry,
+                "website": app_record.drive.company.website,
                 "description": app_record.drive.company.description, # Ensure this matches your model!
-                "hr_contact": app_record.drive.company.user.email
+                "hr_contact": app_record.drive.company.hr_contact
             },
             "drive_details": {
                 "title": app_record.drive.job_title,
@@ -1019,6 +1020,8 @@ def get_all_student_drives():
             "role": d.job_title, 
             "description": d.job_description,
             "eligibility": f"{d.min_cgpa}" if d.min_cgpa else "No minimum CGPA required",
+            "degree_names": get_names_from_ids(Degree, d.allowed_degrees),
+            "stream_names": get_names_from_ids(Stream, d.allowed_streams),
             "deadline": safe_format_date(d.deadline), 
             "company": d.company.name, 
             "industry": d.company.industry,

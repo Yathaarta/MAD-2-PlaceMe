@@ -96,7 +96,7 @@
                     <small class="text-muted">{{ app.role }}</small>
                   </div>
                   <span class="badge rounded-pill fw-bold p-2 px-3 shadow-sm"
-                        :class="{'bg-primary': app.status === 'Applied', 'bg-success': app.status === 'Shortlisted', 'bg-warning text-dark': app.status === 'Interview', 'bg-danger': app.status === 'Rejected'}">
+                        :class="{'bg-primary': app.status === 'Applied', 'bg-info': app.status === 'Shortlisted', 'bg-warning text-dark': app.status === 'Interview', 'bg-danger': app.status === 'Rejected', 'bg-success': app.status === 'Selected'}">
                     {{ app.status }}
                   </span>
                 </div>
