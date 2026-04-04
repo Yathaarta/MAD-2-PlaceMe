@@ -7,7 +7,7 @@
         <thead class="table-light">
           <tr>
             <th v-for="(col, index) in headers" :key="index"
-              class="py-3 px-5 text-uppercase small fw-bold"
+              class="py-3 px-5 text-uppercase small fw-bold" :class="{'text-center': headers.length-1 === index }"
               >
               {{ col }}
             </th>

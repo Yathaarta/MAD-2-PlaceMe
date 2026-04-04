@@ -832,3 +832,369 @@ def export_applicants():
     return jsonify({
         "message": "CSV Export started! Check your email for the attachment soon."
     }), 200
+
+
+
+# ==========================================================================================
+# STUDENT ENDPOINTS
+# ==========================================================================================
+
+# ----------------- 1. STUDENT DASHBOARD -----------------
+
+@app.route('/api/dashboard/student', methods=['GET'])
+@auth_required('session')
+def student_dashboard_data():
+    if not current_user.has_role('student'): 
+        return jsonify({"error": "Unauthorized"}), 403
+        
+    student = current_user.student_profile
+    
+    # count active and interview apps
+    active_apps_count = Application.query.filter(
+        Application.student_id == student.student_id, 
+        Application.status != ApplicationStatus.REJECTED
+    ).count()
+    
+    interview_count = Application.query.filter(
+        Application.student_id == student.student_id, 
+        Application.status == ApplicationStatus.INTERVIEW
+    ).count()
+
+    # calc profile completion score
+    profile_score = 30 
+    if student.resume_url: 
+        profile_score += 40
+    if student.educations and student.educations[0].verified_edu: 
+        profile_score += 30 
+
+    recent_apps = Application.query.filter_by(student_id=student.student_id).order_by(Application.created_at.desc()).all()
+    recent_apps_data = []
+    applied_drive_ids = []
+    
+    for app in recent_apps:
+        applied_drive_ids.append(app.drive_id)
+        recent_apps_data.append({
+            "id": app.application_id, 
+            "company": app.drive.company.name if app.drive.company else "Unknown", 
+            "role": app.drive.job_title, 
+            "status": app.status.value,
+            "applied_on": safe_format_date(app.created_at)
+        })
+
+    # showing only approved and active drives from non-blacklisted companies
+    ongoing_query = PlacementDrive.query.join(Company).join(User, Company.user_id == User.id).filter(
+        PlacementDrive.is_active == True, 
+        PlacementDrive.is_approved == True,
+        User.active == True 
+    )
+    
+    if applied_drive_ids: 
+        ongoing_query = ongoing_query.filter(~PlacementDrive.drive_id.in_(applied_drive_ids))
+        
+    ongoing_drives = ongoing_query.order_by(PlacementDrive.created_at.desc()).all()
+
+    ongoing_drives_data = []
+    for d in ongoing_drives:
+        ongoing_drives_data.append({
+            "id": d.drive_id, 
+            "company": d.company.name, 
+            "industry": d.company.industry, 
+            "role": d.job_title, 
+            "deadline": safe_format_date(d.deadline)
+        })
+
+    return jsonify({
+        "user": {
+            "name": student.first_name, 
+            "full_name": student.full_name
+        }, 
+        "stats": {
+            "active_applications": active_apps_count, 
+            "upcoming_interviews": interview_count, 
+            "profile_completion": profile_score
+        }, 
+        "ongoing_drives": ongoing_drives_data, 
+        "recent_applications": recent_apps_data
+    }), 200
+
+# ----------------- 2. STUDENT APPLICATIONS -----------------
+
+@app.route('/api/student/applications', methods=['GET'])
+@auth_required('session')
+def get_student_applications():
+    # 1. Ensure the user is a student
+    if not current_user.has_role('student'): 
+        return jsonify({"error": "Unauthorized"}), 403
+        
+    student = current_user.student_profile
+    
+    # 2. Fetch ALL applications using your specific `student_id` column
+    all_apps = Application.query.filter_by(
+        student_id=student.student_id
+    ).order_by(Application.created_at.desc()).all()
+    
+    applications_data = []
+    for app_record in all_apps:
+        applications_data.append({
+            "id": app_record.application_id,
+            "company": app_record.drive.company.name,
+            "role": app_record.drive.job_title,
+            "applied_on": app_record.created_at.strftime("%b %d, %Y"),
+            "status": app_record.status.value,
+            
+            # Split into explicit categories for the frontend
+            "company_details": {
+                "name": app_record.drive.company.name,
+                "industry": app_record.drive.company.industry,
+                "description": app_record.drive.company.description, # Ensure this matches your model!
+                "hr_contact": app_record.drive.company.user.email
+            },
+            "drive_details": {
+                "title": app_record.drive.job_title,
+                "description": app_record.drive.job_description,
+                "deadline": app_record.drive.deadline.strftime("%b %d, %Y")
+            }
+        })
+
+    return jsonify({"application": applications_data}), 200
+
+# ----------------- 3. STUDENT DRIVES -----------------
+
+@app.route('/api/student/drives', methods=['GET'])
+@auth_required('session')
+def get_all_student_drives():
+    if not current_user.has_role('student'): 
+        return jsonify({"error": "Unauthorized"}), 403
+        
+    student = current_user.student_profile
+
+    auto_close_expired_drives()    
+
+    drives = PlacementDrive.query.join(Company).join(User, Company.user_id == User.id).filter(
+        PlacementDrive.is_active == True, 
+        PlacementDrive.is_approved == True,
+        User.active == True
+    ).all()
+    
+    user_apps = Application.query.filter_by(student_id=student.student_id).all()
+    applied_ids = [app.drive_id for app in user_apps]
+    
+    edu = student.educations[0] if student.educations else None
+    prog = Program.query.get(edu.program_id) if (edu and edu.program_id) else None
+    
+    student_cgpa = edu.cgpa if edu else None
+    student_degree_id = str(prog.degree_id) if prog else None
+    student_stream_id = str(prog.stream_id) if prog else None
+    is_verified = edu.verified_edu if edu else False
+
+    drives_data = []
+    
+    for d in drives:
+        is_eligible = True
+        reasons = []
+        
+        # check student eligibility for each drive
+        if not student.resume_url: 
+            is_eligible = False
+            reasons.append("Missing Resume")
+            
+        if not is_verified: 
+            is_eligible = False
+            reasons.append("Education Unverified")
+            
+        if d.min_cgpa and (not student_cgpa or student_cgpa < d.min_cgpa): 
+            is_eligible = False
+            reasons.append(f"{d.min_cgpa}")
+            
+        if d.allowed_degrees and student_degree_id not in [x.strip() for x in d.allowed_degrees.split(',')]: 
+            is_eligible = False
+            reasons.append("Degree Mismatch")
+            
+        if d.allowed_streams and student_stream_id not in [x.strip() for x in d.allowed_streams.split(',')]: 
+            is_eligible = False
+            reasons.append("Stream Mismatch")
+
+        drives_data.append({
+            "id": d.drive_id, 
+            "role": d.job_title, 
+            "description": d.job_description,
+            "eligibility": f"{d.min_cgpa}" if d.min_cgpa else "No minimum CGPA required",
+            "deadline": safe_format_date(d.deadline), 
+            "company": d.company.name, 
+            "industry": d.company.industry,
+            "hr_contact": d.company.hr_contact, 
+            "company_desc": d.company.description,
+            "has_applied": d.drive_id in applied_ids, 
+            "is_eligible": is_eligible, 
+            "ineligibility_reason": " | ".join(reasons) if not is_eligible else ""
+        })
+        
+    return jsonify({
+        "drives": drives_data, 
+        "has_resume": bool(student.resume_url)
+    }), 200
+
+# APPLY TO DRIVE
+@app.route('/api/student/apply/<int:drive_id>', methods=['POST'])
+@auth_required('session')
+def apply_to_drive(drive_id):
+    if not current_user.has_role('student'): 
+        return jsonify({"error": "Unauthorized"}), 403
+        
+    student = current_user.student_profile
+    auto_close_expired_drives() 
+
+    if not student.resume_url or not student.resume_url.strip(): 
+        return jsonify({"error": "Please update your profile with a Resume URL."}), 400
+        
+    if not student.educations or not student.educations[0].verified_edu: 
+        return jsonify({"error": "Education must be verified."}), 400
+        
+    drive = PlacementDrive.query.get(drive_id)
+    
+    if not drive or not drive.is_active or not drive.is_approved: 
+        return jsonify({"error": "Drive is not available."}), 404
+        
+    if not drive.company.user.active:
+        return jsonify({"error": "This drive is no longer accepting applications."}), 403
+        
+    if Application.query.filter_by(student_id=student.student_id, drive_id=drive_id).first(): 
+        return jsonify({"error": "Already applied."}), 400
+        
+    new_application = Application(
+        student_id=student.student_id, 
+        drive_id=drive_id, 
+        status=ApplicationStatus.APPLIED
+    )
+    db.session.add(new_application)
+    db.session.commit()
+    
+    return jsonify({"message": f"Successfully applied for {drive.job_title}!"}), 201
+
+
+# ----------------- 4. STUDENT PROFILE & EXPORTS -----------------
+
+# MANAGE PROFILE
+@app.route('/api/student/profile', methods=['GET', 'PUT', 'DELETE'])
+@auth_required('session')
+def manage_student_profile():
+    if not current_user.has_role('student'): 
+        return jsonify({"error": "Unauthorized"}), 403
+        
+    student = current_user.student_profile
+    
+    # get profile
+    if request.method == 'GET':
+        edu = student.educations[0] if student.educations else None
+        prog = Program.query.get(edu.program_id) if (edu and edu.program_id) else None
+        
+        return jsonify({
+            "full_name": student.full_name, 
+            "uniquifier": current_user.fs_uniquifier, 
+            "resume_url": student.resume_url or "",
+            "email": current_user.email, 
+            "age": int(student.age) if student.age else "",
+            "education": {
+                "degree": prog.degree.name if prog else "N/A", 
+                "degree_id": prog.degree_id if prog else "",
+                "stream": prog.stream.name if prog else "N/A", 
+                "stream_id": prog.stream_id if prog else "",
+                "cgpa": float(edu.cgpa) if edu and edu.cgpa else None,
+                "start_year": edu.start_year.strftime('%Y-%m') if edu and edu.start_year else "",
+                "end_year": edu.end_year.strftime('%Y-%m') if edu and edu.end_year else "",
+                "verified_edu": bool(edu.verified_edu) if edu else False
+            }
+        }), 200
+
+    # update profile
+    if request.method == 'PUT':
+        data = request.get_json()
+        full_name = data.get('full_name', '').strip()
+        
+        if full_name and full_name != student.full_name:
+            try: 
+                validate_official_name(full_name) 
+            except ValidationError as e: 
+                return jsonify({"error": e.messages[0] if isinstance(e.messages, list) else str(e)}), 400
+                
+            parts = full_name.split(' ', 1)
+            student.first_name = parts[0]
+            student.last_name = parts[1] if len(parts) > 1 else ""
+
+        age_val = data.get('age')
+        student.age = age_val if age_val else None
+        student.resume_url = data.get('resume_url', student.resume_url)
+        
+        edu_data = data.get('education', {})
+        if student.educations:
+            edu = student.educations[0]
+            changed = False
+            
+            if edu_data.get('cgpa') and str(edu.cgpa) != str(edu_data['cgpa']): 
+                edu.cgpa = edu_data['cgpa']
+                changed = True
+                
+            if edu_data.get('start_year'):
+                ns = datetime.strptime(edu_data['start_year'], '%Y-%m').date()
+                if not edu.start_year or edu.start_year != ns: 
+                    edu.start_year = ns
+                    changed = True
+                    
+            if edu_data.get('end_year'):
+                ne = datetime.strptime(edu_data['end_year'], '%Y-%m').date()
+                if not edu.end_year or edu.end_year != ne: 
+                    edu.end_year = ne
+                    changed = True
+                    
+            deg_id = edu_data.get('degree_id')
+            stream_id = edu_data.get('stream_id')
+            
+            if deg_id and stream_id:
+                prog = Program.query.get(edu.program_id) if edu.program_id else None
+                if not prog or str(prog.degree_id) != str(deg_id) or str(prog.stream_id) != str(stream_id):
+                    new_prog = Program.query.filter_by(degree_id=deg_id, stream_id=stream_id).first()
+                    if new_prog: 
+                        edu.program_id = new_prog.id
+                        changed = True
+                        
+            if changed: 
+                # reverts verification if core academic data is changed
+                edu.verified_edu = False 
+                
+        db.session.commit()
+        return jsonify({
+            "message": "Profile updated successfully! Admin will verify your education details.", 
+            "full_name": student.full_name, 
+            "verified_edu": bool(edu.verified_edu)
+        }), 200
+
+    # delete account
+    if request.method == 'DELETE':
+        # clean up all data related to the student
+        Application.query.filter_by(student_id=student.student_id).delete()
+        Education.query.filter_by(student_id=student.student_id).delete()
+        db.session.delete(student)
+        
+        current_user.roles = []
+        db.session.delete(current_user)
+        db.session.commit()
+        logout_user()
+        
+        return jsonify({"message": "Account successfully deleted."}), 200
+
+# EXPORT CSV
+@app.route('/api/student/export-applications', methods=['POST'])
+@auth_required('session')
+@email_verification_required
+def export_applications():
+    if not current_user.has_role('student'): 
+        return jsonify({"error": "Unauthorized"}), 403
+        
+    student = current_user.student_profile
+    
+    # trigger background task
+    export_student_applications_csv.delay(student.student_id, current_user.email, student.full_name)
+    
+    return jsonify({
+        "message": "CSV Export started! Check your email for the attachment soon."
+    }), 200
