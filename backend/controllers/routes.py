@@ -14,7 +14,7 @@ import random
 import redis
 
 # IMPORT OUR CELERY TASKS
-from tasks import send_otp_email, export_company_applicants_csv
+from async_jobs.tasks import send_otp_email, export_company_applicants_csv
 
 # ---------------------- INITIALIZE REDIS CLIENT ----------------------
 
