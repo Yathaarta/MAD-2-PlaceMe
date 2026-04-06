@@ -12,15 +12,15 @@ def celery_init_app(app) -> Celery:
             beat_schedule={
                 'monthly-student-reports': {
                     'task': 'send_monthly_student_reports',
-                    'schedule': crontab(minute='*'),
+                    'schedule': crontab(day_of_month='1', hour=9, minute=0),
                 },
                 'monthly-company-reports': {
                     'task': 'send_monthly_company_reports',
-                    'schedule': crontab(minute='*'),
+                    'schedule': crontab(day_of_month='1', hour=9, minute=0),
                 },
                 'monthly-admin-reports': {
                     'task': 'send_monthly_admin_reports',
-                    'schedule': crontab(minute='*'),
+                    'schedule': crontab(day_of_month='1', hour=9, minute=0),
                 },
             }
         ),

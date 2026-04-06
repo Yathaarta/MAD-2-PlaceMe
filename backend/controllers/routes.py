@@ -12,9 +12,10 @@ from .decorators import email_verification_required
 
 import random
 import redis
+import json
 
 # IMPORT OUR CELERY TASKS
-from async_jobs.tasks import send_otp_email, export_company_applicants_csv
+from async_jobs.tasks import send_otp_email, export_company_applicants_csv, export_student_applications_csv
 
 # ---------------------- INITIALIZE REDIS CLIENT ----------------------
 
@@ -59,6 +60,10 @@ def auto_close_expired_drives():
         for drive in expired_drives:
             drive.is_active = False
         db.session.commit()
+        
+        # Wipig all student drive caches since global drive state changed (drives got expired)
+        for key in redis_client.scan_iter("student_drives:*"):
+            redis_client.delete(key)
 
 
 # ==========================================================================================
@@ -509,6 +514,9 @@ def admin_verify_student(student_id):
     edu.verified_edu = True
     db.session.commit()
     
+    # Invalidating specific student cache because their education was just verified ( it affects eligibility)
+    redis_client.delete(f'student_drives:{student_id}')
+    
     return jsonify({"message": "Student education verified successfully."}), 200
 
 
@@ -556,6 +564,10 @@ def admin_approve_drive(drive_id):
         
     drive.is_approved = True
     db.session.commit()
+    
+    # Wiping all student drive caches since a new drive was just approved globally
+    for key in redis_client.scan_iter("student_drives:*"):
+        redis_client.delete(key)
     
     return jsonify({"message": "Placement drive approved for students."}), 200
 
@@ -697,6 +709,10 @@ def update_company_drive(drive_id):
     if 'is_active' in data:
         drive.is_active = False
         db.session.commit()
+        
+        # Wiping all student drive caches since a drive was closed early globally
+        for key in redis_client.scan_iter("student_drives:*"):
+            redis_client.delete(key)
 
         return jsonify({"message": "Drive closed early."}), 200
     
@@ -714,6 +730,11 @@ def update_company_drive(drive_id):
         drive.deadline = new_deadline
         
     db.session.commit()
+    
+    # Wiping all student drive caches since drive details (desc or deadline) changed
+    for key in redis_client.scan_iter("student_drives:*"):
+        redis_client.delete(key)
+        
     return jsonify({"message": "Drive updated successfully."}), 200
 
 
@@ -969,6 +990,11 @@ def get_all_student_drives():
         
     student = current_user.student_profile
 
+    # Checking if a cached personalized payload exists before hitting the database
+    cached_drives = redis_client.get(f'student_drives:{student.student_id}')
+    if cached_drives:
+        return jsonify(json.loads(cached_drives)), 200
+
     auto_close_expired_drives()    
 
     drives = PlacementDrive.query.join(Company).join(User, Company.user_id == User.id).filter(
@@ -1032,10 +1058,16 @@ def get_all_student_drives():
             "ineligibility_reason": " | ".join(reasons) if not is_eligible else ""
         })
         
-    return jsonify({
+    payload = {
         "drives": drives_data, 
         "has_resume": bool(student.resume_url)
-    }), 200
+    }
+    
+    # storing the student's highly specific payload in Redis with a 1 hour expiration
+    redis_client.setex(f'student_drives:{student.student_id}', 3600, json.dumps(payload))
+    
+    return jsonify(payload), 200
+
 
 # APPLY TO DRIVE
 @app.route('/api/student/apply/<int:drive_id>', methods=['POST'])
@@ -1071,6 +1103,9 @@ def apply_to_drive(drive_id):
     )
     db.session.add(new_application)
     db.session.commit()
+    
+    # Invalidating specific student redis cache so their frontend immediately updates 'has_applied' to True
+    redis_client.delete(f'student_drives:{student.student_id}')
     
     return jsonify({"message": f"Successfully applied for {drive.job_title}!"}), 201
 
@@ -1165,6 +1200,10 @@ def manage_student_profile():
                 edu.verified_edu = False 
                 
         db.session.commit()
+        
+        # Invalidating specific student redis cache because updated CGPA/degree will alter their job eligibility
+        redis_client.delete(f'student_drives:{student.student_id}')
+        
         return jsonify({
             "message": "Profile updated successfully! Admin will verify your education details.", 
             "full_name": student.full_name, 
