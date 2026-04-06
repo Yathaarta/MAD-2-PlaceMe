@@ -58,7 +58,7 @@ def send_monthly_student_reports():
     with app.app_context():
         students = StudentProfile.query.all()
         for student in students:
-            if not student.user.active:
+            if not student.user.active or not student.user.confirmed_at:
                 continue
                 
             apps = Application.query.filter(
@@ -88,7 +88,7 @@ def send_monthly_company_reports():
     with app.app_context():
         companies = Company.query.all()
         for company in companies:
-            if not company.user.active or not company.is_approved:
+            if not company.user.active or not company.is_approved or not company.user.confirmed_at:
                 continue
                 
             drives = PlacementDrive.query.filter(
@@ -138,6 +138,8 @@ def send_monthly_admin_reports():
         plain_text = f"Admin Report {month_name} | New Students: {new_users} | New Companies: {new_comps} | Drives: {new_drives} | Apps: {new_apps}"
         
         for admin in admins:
+            if not admin.confirmed_at:
+                continue
             send_report_email(admin.email, f"PlaceMe Platform Growth - {month_name}", plain_text, html_content)
 
     return "Admin reports sent."
