@@ -52,7 +52,7 @@ const isMobileOpen = ref(false);
 
 <style scoped>
 .dashboard-theme {
-  background: linear-gradient(135deg, #e0f7fa 0%, #c8e6c9 100%);
+  background: linear-gradient(135deg, rgb(227, 242, 253) 0%, #c8e6c9 100%);
   overflow-x: hidden;
 }
 

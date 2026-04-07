@@ -239,10 +239,11 @@ const fetchOptions = async () => {
     degrees.value = degRes.data;
     let allStreams = [];
     for (let deg of degrees.value) {
-       const streamRes = await axios.get(`/api/streams/${deg.id}`);
-       allStreams = [...allStreams, ...streamRes.data];
+      const streamRes = await axios.get(`/api/streams/${deg.id}`);
+      const mappedStreams = streamRes.data.map(stream => ({ ...stream, degree_id: deg.id}));
+      allStreams = [...allStreams, ...mappedStreams];
     }
-    streams.value = Array.from(new Map(allStreams.map(item => [item.id, item])).values());
+    streams.value = allStreams;
   } catch(e) {
     console.error("Error loading degree/stream data:", e);
   }
