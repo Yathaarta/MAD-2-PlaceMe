@@ -128,8 +128,8 @@ def send_monthly_admin_reports():
         if not admins:
             return "No admins found."
             
-        new_users = User.query.filter(User.roles.any(name='student'), User.confirmed_at >= start_date, User.confirmed_at <= end_date).count() # type: ignore
-        new_comps = User.query.filter(User.roles.any(name='company'), User.confirmed_at >= start_date, User.confirmed_at <= end_date).count() # type: ignore
+        new_users = User.query.filter(User.roles.any(name='student'), User.created_at >= start_date, User.created_at <= end_date).count() # type: ignore
+        new_comps = User.query.filter(User.roles.any(name='company'), User.created_at >= start_date, User.created_at <= end_date).count() # type: ignore
         
         new_drives = PlacementDrive.query.filter(PlacementDrive.created_at >= start_date, PlacementDrive.created_at <= end_date).count()
         new_apps = Application.query.filter(Application.created_at >= start_date, Application.created_at <= end_date).count()
@@ -138,8 +138,6 @@ def send_monthly_admin_reports():
         plain_text = f"Admin Report {month_name} | New Students: {new_users} | New Companies: {new_comps} | Drives: {new_drives} | Apps: {new_apps}"
         
         for admin in admins:
-            if not admin.confirmed_at:
-                continue
             send_report_email(admin.email, f"PlaceMe Platform Growth - {month_name}", plain_text, html_content)
 
     return "Admin reports sent."
