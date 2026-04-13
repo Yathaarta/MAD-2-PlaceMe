@@ -79,17 +79,17 @@ onMounted(async () => {
 
               backgroundColor: [
                 'rgba(13, 202, 240, 0.4)',  // Cyan
-                'rgba(25, 135, 84, 0.4)',   // Green
                 'rgba(255, 193, 7, 0.4)',   // Yellow
                 'rgba(220, 53, 69, 0.4)',   // Red
-                'rgba(108, 117, 125, 0.4)'  // Gray
+                'rgba(25, 135, 84, 0.4)',   // Green
+                'rgba(108, 117, 125, 0.4)',  // Gray
               ],
               borderColor: [
                 '#0dcaf0',
-                '#198754',
                 '#ffc107',
                 '#dc3545',
-                '#6c757d'
+                '#198754',
+                '#6c757d',
               ],
               borderWidth: 2
             }]
