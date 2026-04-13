@@ -6,6 +6,46 @@
   <div v-else-if="dashboardData" class="container-fluid px-0">
     <h2 class="fw-bold text-dark mb-4">Student Overview</h2>
 
+    <div v-if="dashboardData.stats.profile_completion < 100"
+           class="alert alert-warning border-0 shadow-sm rounded-4 p-4 d-flex align-items-center mb-4">
+        <i class="bi bi-shield-exclamation fs-2 me-3 text-warning"></i>
+        <div>
+          <h5 class="fw-bold mb-1 text-dark">Action Required: Profile Incomplete</h5>
+          <p class="mb-0 text-muted small">
+            You cannot apply to placement drives yet. Please ensure your profile is 100% complete so the Institute Admin can verify your details.
+          </p>
+        </div>
+      </div>
+
+      <div v-else>
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
+          <div class="p-4 p-md-5 text-white position-relative"
+            style="background: linear-gradient(to right, #0ba360, #3cba92);">
+            <div class="row align-items-center position-relative z-1">
+              <div class="col-md-8">
+                <span class="badge bg-white text-success fw-bold mb-3 shadow-sm px-3 py-2 rounded-pill">
+                  Student Portal
+                </span>
+                <h2 class="fw-bold mb-2">Welcome back to PlaceMe!</h2>
+                <p class="fs-5 mb-0" style="color: rgba(255,255,255,0.85);">
+                  Discover new career opportunities and track your placement journey.
+                </p>
+              </div>
+              <div class="col-md-4 text-md-end mt-4 mt-md-0">
+                <router-link to="/student-dashboard/drives"
+                  class="btn btn-light text-success rounded-pill px-4 py-2 fw-bold shadow-sm me-2 mb-2">
+                  <i class="bi bi-search me-2"></i> Browse Drives
+                </router-link>
+                <router-link to="/student-dashboard/profile"
+                  class="btn btn-outline-light rounded-pill px-4 py-2 fw-bold mb-2">
+                  <i class="bi bi-person-badge me-2"></i> My Profile
+                </router-link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
     <!-- Stats Row -->
       <div class="row g-4 mb-5">
         <div class="col-lg-4">

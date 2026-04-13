@@ -16,6 +16,33 @@
           <p class="mb-0 text-muted small">You can create placement drives, but they will not be visible to students until the Institute Admin verifies your company profile.</p>
         </div>
       </div>
+      <div v-else>
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
+          <div class="p-4 p-md-5 text-white position-relative"
+            style="background: linear-gradient(to right, #2b32b2, #1488cc);">
+            <div class="row align-items-center position-relative z-1">
+              <div class="col-md-8">
+                <span class="badge bg-white text-primary fw-bold mb-3 shadow-sm px-3 py-2 rounded-pill">
+                  {{ dashboardData.company.industry || 'Industry Pending' }}
+                </span>
+                <h2 class="fw-bold mb-2">Welcome back, {{ dashboardData.company.name }}!</h2>
+                <p class="text-white-50 fs-5 mb-0">Manage your recruitment drives and discover top campus talent.</p>
+              </div>
+              <!-- Quick Action Buttons -->
+              <div class="col-md-4 text-md-end mt-4 mt-md-0">
+                <router-link to="/company-dashboard/drives"
+                  class="btn btn-light text-primary rounded-pill px-4 py-2 fw-bold shadow-sm me-2 mb-2">
+                  <i class="bi bi-plus-lg me-2"></i> Post New Drive
+                </router-link>
+                <router-link to="/company-dashboard/applicants"
+                  class="btn btn-outline-light rounded-pill px-4 py-2 fw-bold mb-2">
+                  <i class="bi bi-people-fill me-2"></i> View Candidates
+                </router-link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
       <!-- Stats Row -->
       <div class="row g-4 mb-5">
