@@ -18,15 +18,14 @@
 
       <div v-else class="card bg-white border-0 shadow-sm rounded-4 overflow-hidden mb-4">
         <!-- DICEBEAR AVATAR BANNER -->
-        <div class="bg-success text-white p-4 p-md-5 d-flex align-items-center" style="background: linear-gradient(135deg, #43a047 0%, #1de9b6 100%);">
-          <div class="bg-white rounded-circle p-1 me-4 shadow-lg overflow-hidden d-flex justify-content-center align-items-center" style="width: 100px; height: 100px;">
-            <!-- EXPLICITLY using authStore.userUniquifier so it perfectly matches the Navbar -->
+        <div class="bg-success text-white p-4 p-md-5 d-flex flex-column flex-md-row align-items-center text-center text-md-start" style="background: linear-gradient(135deg, #43a047 0%, #1de9b6 100%);">
+          <div class="bg-white rounded-circle p-1 mb-3 mb-md-0 me-md-4 shadow-lg overflow-hidden d-flex justify-content-center align-items-center flex-shrink-0" style="width: 100px; height: 100px;">
             <img v-if="authStore.userUniquifier" :src="`https://api.dicebear.com/7.x/identicon/svg?seed=${authStore.userUniquifier}&backgroundColor=198754`" alt="Avatar" width="100" height="100" />
             <i v-else class="bi bi-person-fill display-1 text-secondary bg-light w-100 h-100 d-flex align-items-center justify-content-center"></i>
           </div>
-          <div>
+          <div class="text-break" style="word-wrap: break-word; min-width: 0;">
             <h2 class="fw-bold mb-1">{{ profileForm.full_name }}</h2>
-            <p class="mb-0 text-light fs-5"><i class="bi bi-envelope me-2"></i>{{ profileForm.email }}</p>
+            <p class="mb-0 text-light fs-5"><i class="bi bi-envelope me-2 d-none d-md-inline"></i>{{ profileForm.email }}</p>
           </div>
         </div>
 
