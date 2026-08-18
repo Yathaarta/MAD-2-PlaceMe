@@ -135,26 +135,26 @@ Add application screenshots here as the project is documented further.
 
 ### Student Pages
 
-<img width="33%" alt="image" src="https://github.com/user-attachments/assets/403a16f0-8ab5-430b-bd48-3b599b6603ee" />
-<img width="33%" alt="image" src="https://github.com/user-attachments/assets/2d1b837e-017b-4cbc-9f14-65635763212b" />
-<img width="33%" alt="image" src="https://github.com/user-attachments/assets/af32a343-f15f-473d-97b0-193c1def45de" />
-<img width="33%" alt="image" src="https://github.com/user-attachments/assets/d9100a46-980a-4329-a529-5c11325ea2ea" />
-<img width="33%" alt="image" src="https://github.com/user-attachments/assets/9a689298-1a11-4112-8b90-ec7ee791f8bb" />
+<img width="32%" alt="image" src="https://github.com/user-attachments/assets/403a16f0-8ab5-430b-bd48-3b599b6603ee" />
+<img width="32%" alt="image" src="https://github.com/user-attachments/assets/2d1b837e-017b-4cbc-9f14-65635763212b" />
+<img width="32%" alt="image" src="https://github.com/user-attachments/assets/af32a343-f15f-473d-97b0-193c1def45de" />
+<img width="32%" alt="image" src="https://github.com/user-attachments/assets/d9100a46-980a-4329-a529-5c11325ea2ea" />
+<img width="32%" alt="image" src="https://github.com/user-attachments/assets/9a689298-1a11-4112-8b90-ec7ee791f8bb" />
 
 ### Company Pages
 
-<img width="33%" alt="image" src="https://github.com/user-attachments/assets/0010758b-da97-47ce-9743-2d0504763d0c" />
-<img width="33%" alt="image" src="https://github.com/user-attachments/assets/a6ca9b9a-daa3-4a8b-9e63-daa267fc886a" />
-<img width="33%" alt="image" src="https://github.com/user-attachments/assets/bdfe50c0-8993-4d13-ad96-297afc2b5648" />
-<img width="33%" alt="image" src="https://github.com/user-attachments/assets/7658b5db-b859-4e83-b470-d70b2c50148c" />
-<img width="33%" alt="image" src="https://github.com/user-attachments/assets/d02efeda-ca8b-418b-aa29-dee1d6200632" />
+<img width="32%" alt="image" src="https://github.com/user-attachments/assets/0010758b-da97-47ce-9743-2d0504763d0c" />
+<img width="32%" alt="image" src="https://github.com/user-attachments/assets/a6ca9b9a-daa3-4a8b-9e63-daa267fc886a" />
+<img width="32%" alt="image" src="https://github.com/user-attachments/assets/bdfe50c0-8993-4d13-ad96-297afc2b5648" />
+<img width="32%" alt="image" src="https://github.com/user-attachments/assets/7658b5db-b859-4e83-b470-d70b2c50148c" />
+<img width="32%" alt="image" src="https://github.com/user-attachments/assets/d02efeda-ca8b-418b-aa29-dee1d6200632" />
 
 ### Admin Pages
 
-<img width="33%" alt="image" src="https://github.com/user-attachments/assets/24ac51e6-bbb1-4d7f-b5cb-d78cf3d8c89b" />
-<img width="33%" alt="image" src="https://github.com/user-attachments/assets/320fbbec-ac14-4516-9fb5-8499430ff7df" />
-<img width="33%" alt="image" src="https://github.com/user-attachments/assets/c9837a3e-6223-45df-8a07-ca1de5616cd6" />
-<img width="33%" alt="image" src="https://github.com/user-attachments/assets/5145701a-02eb-4518-bdf2-d499a2db5863" />
+<img width="32%" alt="image" src="https://github.com/user-attachments/assets/24ac51e6-bbb1-4d7f-b5cb-d78cf3d8c89b" />
+<img width="32%" alt="image" src="https://github.com/user-attachments/assets/320fbbec-ac14-4516-9fb5-8499430ff7df" />
+<img width="32%" alt="image" src="https://github.com/user-attachments/assets/c9837a3e-6223-45df-8a07-ca1de5616cd6" />
+<img width="32%" alt="image" src="https://github.com/user-attachments/assets/5145701a-02eb-4518-bdf2-d499a2db5863" />
 
 ---
 
