@@ -20,7 +20,7 @@
       <div v-else>
         <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
           <div class="p-4 p-md-5 text-white position-relative"
-            style="background: linear-gradient(to right, #0ba360, #3cba92);">
+            style="background: linear-gradient(to right, #0ba360, #1e9f76);">
             <div class="row align-items-center position-relative z-1">
               <div class="col-md-8">
                 <span class="badge bg-white text-success fw-bold mb-3 shadow-sm px-3 py-2 rounded-pill">

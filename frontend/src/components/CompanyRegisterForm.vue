@@ -22,7 +22,7 @@
              <!-- Email input  -->
             <div class="mb-1 position-relative">
               <input v-model="form.hrEmail" type="email" class="form-control bg-light py-2"
-                placeholder="University Email" :readonly="isVerified" required>
+                placeholder="Company Login Email" :readonly="isVerified" required>
               <i v-if="isVerified"
                 class="bi bi-check-circle-fill text-success position-absolute top-50 end-0 translate-middle-y me-3"></i>
             </div>

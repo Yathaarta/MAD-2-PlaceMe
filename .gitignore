@@ -101,12 +101,16 @@ coverage/
 cypress/videos/
 cypress/screenshots/
 __screenshots__/
-
+ 
 
 # ==============================================================================
 # PERSONAL DOCUMENTATION (Your diagrams)
 # ==============================================================================
 
-# Excalidraw files (Your personal sketches)
+# Excalidraw files (Personal sketches)
 *.excalidraw
 *.excalidraw.json
+
+
+frontend/.env.development
+frontend/.env.production
