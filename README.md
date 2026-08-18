@@ -322,6 +322,13 @@ BS Data Science Student @ IIT Madras
 
 ## ⭐ Project Status
 
-**Project completed and successfully deployed.** ➡️ ⌊ [![Website](https://img.shields.io/badge/Visit_Website-191970?style=for-the-badge&logo=vercel&logoColor=white)](https://placeme-portal.vercel.app/) ⌋
+**Project completed and successfully deployed.**
+
+[![Website](https://img.shields.io/badge/Visit_Website-191970?style=for-the-badge&logo=vercel&logoColor=white)](https://placeme-portal.vercel.app/)
+
+| [![](https://img.shields.io/badge/View%20ERDiagram%20png-8A2BE2)](https://drive.google.com/file/d/1hQjWzMPR5LqOSq35vMXJE_Kahq9J4aIk/view?usp=drivesdk) | 
+[![](https://img.shields.io/badge/View%20Report%20PDF-8A2BE2)](https://drive.google.com/file/d/1N_7gWiJ7_4kKcGszyBWP00dEaUewy_tx/view?usp=drivesdk) |
+[![](https://img.shields.io/badge/View%20Demo%20Video-8A2BE2)](https://drive.google.com/file/d/1JRiAOQKH7wfCt2OsJkOMhHKQuphLn-n6/view?usp=drivesdk) |
+
   
 
